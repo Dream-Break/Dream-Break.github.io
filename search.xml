@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Java Serializable</title>
+    <title>Java序列化有什么作用？序列化与不序列化有什么区别？</title>
     <url>/blog/2021/03/19/Java-Serializable/</url>
     <content><![CDATA[<p>作者：CodeSheep程序羊<br>链接：<a href="https://www.zhihu.com/question/26475281/answer/1257699781">https://www.zhihu.com/question/26475281/answer/1257699781</a><br>来源：知乎<br>著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
 <h2 id="序列化是干啥用的？"><a href="#序列化是干啥用的？" class="headerlink" title="序列化是干啥用的？"></a><strong>序列化是干啥用的？</strong></h2><p>序列化的原本意图是希望对一个Java对象作一下“变换”，变成字节序列，这样一来方便持久化存储到磁盘，避免程序运行结束后对象就从内存里消失，另外变换成字节序列也更便于网络运输和传播，所以概念上很好理解：</p>
