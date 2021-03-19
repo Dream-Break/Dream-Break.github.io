@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Java Serializable</title>
+    <url>/blog/2021/03/19/Java-Serializable/</url>
+    <content><![CDATA[<p>作者：CodeSheep程序羊<br>链接：<a href="https://www.zhihu.com/question/26475281/answer/1257699781">https://www.zhihu.com/question/26475281/answer/1257699781</a><br>来源：知乎<br>著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
+<h2 id="序列化是干啥用的？"><a href="#序列化是干啥用的？" class="headerlink" title="序列化是干啥用的？"></a><strong>序列化是干啥用的？</strong></h2><p>序列化的原本意图是希望对一个Java对象作一下“变换”，变成字节序列，这样一来方便持久化存储到磁盘，避免程序运行结束后对象就从内存里消失，另外变换成字节序列也更便于网络运输和传播，所以概念上很好理解：</p>
+<ul>
+<li><strong>序列化</strong>：把Java对象转换为字节序列。</li>
+<li><strong>反序列化</strong>：把字节序列恢复为原先的Java对象。</li>
+</ul>
+<p><img src="https://pic1.zhimg.com/50/v2-d5b7da5ee39eef8754554efb392e7668_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic1.zhimg.com/80/v2-d5b7da5ee39eef8754554efb392e7668_720w.jpg?source=1940ef5c" alt="img"></p>
+<p>而且序列化机制从某种意义上来说也弥补了平台化的一些差异，毕竟转换后的字节流可以在其他平台上进行反序列化来恢复对象。</p>
+<p>事情就是那么个事情，看起来很简单，不过后面的东西还不少，请往下看。</p>
+<hr>
+<h2 id="对象如何序列化？"><a href="#对象如何序列化？" class="headerlink" title="对象如何序列化？"></a><strong>对象如何序列化？</strong></h2><p>然而Java目前并没有一个关键字可以直接去定义一个所谓的“可持久化”对象。</p>
+<p>对象的持久化和反持久化需要靠程序员在代码里手动<strong>显式地</strong>进行序列化和反序列化还原的动作。</p>
+<p>举个例子，假如我们要对<code>Student</code>类对象序列化到一个名为<code>student.txt</code>的文本文件中，然后再通过文本文件反序列化成<code>Student</code>类对象：</p>
+<p><img src="https://pic4.zhimg.com/50/v2-b176ec7a4fef630598ee4f69743e56ac_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic4.zhimg.com/80/v2-b176ec7a4fef630598ee4f69743e56ac_720w.jpg?source=1940ef5c" alt="img"></p>
+<p>1、Student类定义</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">public class Student implements Serializable &#123;</span><br><span class="line"></span><br><span class="line">    private String name;</span><br><span class="line">    private Integer age;</span><br><span class="line">    private Integer score;</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    public String toString() &#123;</span><br><span class="line">        return &quot;Student:&quot; + &#x27;\n&#x27; +</span><br><span class="line">        &quot;name = &quot; + this.name + &#x27;\n&#x27; +</span><br><span class="line">        &quot;age = &quot; + this.age + &#x27;\n&#x27; +</span><br><span class="line">        &quot;score = &quot; + this.score + &#x27;\n&#x27;</span><br><span class="line">        ;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // ... 其他省略 ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2、序列化</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">public static void serialize(  ) throws IOException &#123;</span><br><span class="line"></span><br><span class="line">    Student student = new Student();</span><br><span class="line">    student.setName(&quot;CodeSheep&quot;);</span><br><span class="line">    student.setAge( 18 );</span><br><span class="line">    student.setScore( 1000 );</span><br><span class="line"></span><br><span class="line">    ObjectOutputStream objectOutputStream = </span><br><span class="line">        new ObjectOutputStream( new FileOutputStream( new File(&quot;student.txt&quot;) ) );</span><br><span class="line">    objectOutputStream.writeObject( student );</span><br><span class="line">    objectOutputStream.close();</span><br><span class="line">    </span><br><span class="line">    System.out.println(&quot;序列化成功！已经生成student.txt文件&quot;);</span><br><span class="line">    System.out.println(&quot;==============================================&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3、反序列化</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">public static void deserialize(  ) throws IOException, ClassNotFoundException &#123;</span><br><span class="line">    ObjectInputStream objectInputStream = </span><br><span class="line">        new ObjectInputStream( new FileInputStream( new File(&quot;student.txt&quot;) ) );</span><br><span class="line">    Student student = (Student) objectInputStream.readObject();</span><br><span class="line">    objectInputStream.close();</span><br><span class="line">    </span><br><span class="line">    System.out.println(&quot;反序列化结果为：&quot;);</span><br><span class="line">    System.out.println( student );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>4、运行结果</p>
+<p>控制台打印：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">序列化成功！已经生成student.txt文件</span><br><span class="line">==============================================</span><br><span class="line">反序列化结果为：</span><br><span class="line">Student:</span><br><span class="line">name = CodeSheep</span><br><span class="line">age = 18</span><br><span class="line">score = 1000</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Serializable接口有何用？"><a href="#Serializable接口有何用？" class="headerlink" title="Serializable接口有何用？"></a><strong>Serializable接口有何用？</strong></h2><p>上面在定义<code>Student</code>类时，实现了一个<code>Serializable</code>接口，然而当我们点进<code>Serializable</code>接口内部查看，发现它<strong>竟然是一个空接口</strong>，并没有包含任何方法！</p>
+<p><img src="https://pic2.zhimg.com/50/v2-946e2589cfddb10080f42d072d4ec4fe_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic2.zhimg.com/80/v2-946e2589cfddb10080f42d072d4ec4fe_720w.jpg?source=1940ef5c" alt="img"></p>
+<p>试想，如果上面在定义<code>Student</code>类时忘了加<code>implements Serializable</code>时会发生什么呢？</p>
+<p>实验结果是：此时的程序运行<strong>会报错</strong>，并抛出<code>NotSerializableException</code>异常：</p>
+<p><img src="https://pic4.zhimg.com/50/v2-2715eb902b48b0d13e2ec788b62d8d99_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic4.zhimg.com/80/v2-2715eb902b48b0d13e2ec788b62d8d99_720w.jpg?source=1940ef5c" alt="img"></p>
+<p>我们按照错误提示，由源码一直跟到<code>ObjectOutputStream</code>的<code>writeObject0()</code>方法底层一看，才恍然大悟：</p>
+<p><img src="https://pic4.zhimg.com/50/v2-bde7f25f1ed5d0aaf76c12d12554795d_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic4.zhimg.com/80/v2-bde7f25f1ed5d0aaf76c12d12554795d_720w.jpg?source=1940ef5c" alt="img"></p>
+<p>如果一个对象既不是<strong>字符串</strong>、<strong>数组</strong>、<strong>枚举</strong>，而且也没有实现<code>Serializable</code>接口的话，在序列化时就会抛出<code>NotSerializableException</code>异常！</p>
+<p>哦，我明白了！</p>
+<p>原来<code>Serializable</code>接口也仅仅只是做一个标记用！！！</p>
+<p>它告诉代码只要是实现了<code>Serializable</code>接口的类都是可以被序列化的！然而真正的序列化动作不需要靠它完成。</p>
+<hr>
+<h2 id="serialVersionUID号有何用？"><a href="#serialVersionUID号有何用？" class="headerlink" title="serialVersionUID号有何用？"></a><strong><code>serialVersionUID</code>号有何用？</strong></h2><p>相信你一定经常看到有些类中定义了如下代码行，即定义了一个名为<code>serialVersionUID</code>的字段：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">private static final long serialVersionUID = -4392658638228508589L;</span><br></pre></td></tr></table></figure>
+
+<p><strong>你知道这句声明的含义吗？为什么要搞一个名为<code>serialVersionUID</code>的序列号？</strong></p>
+<p>继续来做一个简单实验，还拿上面的<code>Student</code>类为例，我们并没有人为在里面显式地声明一个<code>serialVersionUID</code>字段。</p>
+<p>我们首先还是调用上面的<code>serialize()</code>方法，将一个<code>Student</code>对象序列化到本地磁盘上的<code>student.txt</code>文件：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">public static void serialize() throws IOException &#123;</span><br><span class="line"></span><br><span class="line">    Student student = new Student();</span><br><span class="line">    student.setName(&quot;CodeSheep&quot;);</span><br><span class="line">    student.setAge( 18 );</span><br><span class="line">    student.setScore( 100 );</span><br><span class="line"></span><br><span class="line">    ObjectOutputStream objectOutputStream = </span><br><span class="line">        new ObjectOutputStream( new FileOutputStream( new File(&quot;student.txt&quot;) ) );</span><br><span class="line">    objectOutputStream.writeObject( student );</span><br><span class="line">    objectOutputStream.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来我们在<code>Student</code>类里面动点手脚，比如在里面再增加一个名为<code>studentID</code>的字段，表示学生学号：</p>
+<p><img src="https://pic2.zhimg.com/50/v2-d6f5db64071b4ff61a4fdbedcab3a4ec_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic2.zhimg.com/80/v2-d6f5db64071b4ff61a4fdbedcab3a4ec_720w.jpg?source=1940ef5c" alt="img"></p>
+<p>这时候，我们拿刚才已经序列化到本地的<code>student.txt</code>文件，还用如下代码进行反序列化，试图还原出刚才那个<code>Student</code>对象：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">public static void deserialize(  ) throws IOException, ClassNotFoundException &#123;</span><br><span class="line">    ObjectInputStream objectInputStream = </span><br><span class="line">        new ObjectInputStream( new FileInputStream( new File(&quot;student.txt&quot;) ) );</span><br><span class="line">    Student student = (Student) objectInputStream.readObject();</span><br><span class="line">    objectInputStream.close();</span><br><span class="line">    </span><br><span class="line">    System.out.println(&quot;反序列化结果为：&quot;);</span><br><span class="line">    System.out.println( student );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行发现<strong>报错了</strong>，并且抛出了<code>InvalidClassException</code>异常：</p>
+<p><img src="https://pic1.zhimg.com/50/v2-21a3779d602dec56312ec2006059d568_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic1.zhimg.com/80/v2-21a3779d602dec56312ec2006059d568_720w.jpg?source=1940ef5c" alt="img"></p>
+<p>这地方提示的信息非常明确了：序列化前后的<code>serialVersionUID</code>号码不兼容！</p>
+<p>从这地方最起码可以得出<strong>两个</strong>重要信息：</p>
+<ul>
+<li><strong>1、serialVersionUID是序列化前后的唯一标识符</strong></li>
+<li><strong>2、默认如果没有人为显式定义过<code>serialVersionUID</code>，那编译器会为它自动声明一个！</strong></li>
+</ul>
+<p><strong>第1个问题：</strong> <code>serialVersionUID</code>序列化ID，可以看成是序列化和反序列化过程中的“暗号”，在反序列化时，JVM会把字节流中的序列号ID和被序列化类中的序列号ID做比对，只有两者一致，才能重新反序列化，否则就会报异常来终止反序列化的过程。</p>
+<p><strong>第2个问题：</strong> 如果在定义一个可序列化的类时，没有人为显式地给它定义一个<code>serialVersionUID</code>的话，则Java运行时环境会根据该类的各方面信息自动地为它生成一个默认的<code>serialVersionUID</code>，一旦像上面一样更改了类的结构或者信息，则类的<code>serialVersionUID</code>也会跟着变化！</p>
+<p>所以，为了<code>serialVersionUID</code>的确定性，写代码时还是建议，凡是<code>implements Serializable</code>的类，都最好人为显式地为它声明一个<code>serialVersionUID</code>明确值！</p>
+<p>当然，如果不想手动赋值，你也可以借助IDE的自动添加功能，比如我使用的<code>IntelliJ IDEA</code>，按<code>alt + enter</code>就可以为类自动生成和添加<code>serialVersionUID</code>字段，十分方便：</p>
+<p><img src="https://pic2.zhimg.com/50/v2-58dd50e1816eb241d3057b41e421da3c_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic2.zhimg.com/80/v2-58dd50e1816eb241d3057b41e421da3c_720w.jpg?source=1940ef5c" alt="img"></p>
+<hr>
+<h2 id="两种特殊情况"><a href="#两种特殊情况" class="headerlink" title="两种特殊情况"></a><strong>两种特殊情况</strong></h2><ul>
+<li>1、凡是被<code>static</code>修饰的字段是不会被序列化的</li>
+<li>2、凡是被<code>transient</code>修饰符修饰的字段也是不会被序列化的</li>
+</ul>
+<p><strong>对于第一点</strong>，因为序列化保存的是<strong>对象的状态</strong>而非类的状态，所以会忽略<code>static</code>静态域也是理所应当的。</p>
+<p><strong>对于第二点</strong>，就需要了解一下<code>transient</code>修饰符的作用了。</p>
+<p>如果在序列化某个类的对象时，就是不希望某个字段被序列化（比如这个字段存放的是隐私值，如：<code>密码</code>等），那这时就可以用<code>transient</code>修饰符来修饰该字段。</p>
+<p>比如在之前定义的<code>Student</code>类中，加入一个<strong>密码字段</strong>，但是不希望序列化到<code>txt</code>文本，则可以：</p>
+<p><img src="https://pic4.zhimg.com/50/v2-2e8e361785961716c6ce2168ad943faa_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic4.zhimg.com/80/v2-2e8e361785961716c6ce2168ad943faa_720w.jpg?source=1940ef5c" alt="img"></p>
+<p>这样在序列化<code>Student</code>类对象时，<code>password</code>字段会设置为默认值<code>null</code>，这一点可以从反序列化所得到的结果来看出：</p>
+<p><img src="https://pic4.zhimg.com/50/v2-52e8cd9f0b6d2b9c926cbd4d276c95e7_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic4.zhimg.com/80/v2-52e8cd9f0b6d2b9c926cbd4d276c95e7_720w.jpg?source=1940ef5c" alt="img"></p>
+<hr>
+<h2 id="序列化的受控和加强"><a href="#序列化的受控和加强" class="headerlink" title="序列化的受控和加强"></a><strong>序列化的受控和加强</strong></h2><h2 id="约束性加持"><a href="#约束性加持" class="headerlink" title="约束性加持"></a><strong>约束性加持</strong></h2><p>从上面的过程可以看出，序列化和反序列化的过程其实是<strong>有漏洞的</strong>，因为从序列化到反序列化是有中间过程的，如果被别人拿到了中间字节流，然后加以伪造或者篡改，那反序列化出来的对象就会有一定风险了。</p>
+<p>毕竟反序列化也相当于一种 <strong>“隐式的”对象构造</strong> ，因此我们希望在反序列化时，进行<strong>受控的</strong>对象反序列化动作。</p>
+<p>那怎么个受控法呢？</p>
+<p><strong>答案就是：</strong> 自行编写<code>readObject()</code>函数，用于对象的反序列化构造，从而提供约束性。</p>
+<p>既然自行编写<code>readObject()</code>函数，那就可以做很多可控的事情：比如各种判断工作。</p>
+<p>还以上面的<code>Student</code>类为例，一般来说学生的成绩应该在<code>0 ~ 100</code>之间，我们为了防止学生的考试成绩在反序列化时被别人篡改成一个奇葩值，我们可以自行编写<code>readObject()</code>函数用于反序列化的控制：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">private void readObject( ObjectInputStream objectInputStream ) throws IOException, ClassNotFoundException &#123;</span><br><span class="line"></span><br><span class="line">    // 调用默认的反序列化函数</span><br><span class="line">    objectInputStream.defaultReadObject();</span><br><span class="line"></span><br><span class="line">    // 手工检查反序列化后学生成绩的有效性，若发现有问题，即终止操作！</span><br><span class="line">    if( 0 &gt; score || 100 &lt; score ) &#123;</span><br><span class="line">        throw new IllegalArgumentException(&quot;学生分数只能在0到100之间！&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>比如我故意将学生的分数改为<code>101</code>，此时反序列化立马终止并且报错：</p>
+<p><img src="https://pic2.zhimg.com/50/v2-4713bd13ff5dba64ffdcc477c7f7f3a2_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic2.zhimg.com/80/v2-4713bd13ff5dba64ffdcc477c7f7f3a2_720w.jpg?source=1940ef5c" alt="img"></p>
+<p>对于上面的代码，有些小伙伴可能会好奇，为什么自定义的<code>private</code>的<code>readObject()</code>方法可以被自动调用，这就需要你跟一下底层源码来一探究竟了，我帮你跟到了<code>ObjectStreamClass</code>类的最底层，看到这里我相信你一定恍然大悟：</p>
+<p><img src="https://pic3.zhimg.com/50/v2-a047fdae29d82d8682e05cf4cbef587a_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic3.zhimg.com/80/v2-a047fdae29d82d8682e05cf4cbef587a_720w.jpg?source=1940ef5c" alt="img"></p>
+<p>又是反射机制在起作用！是的，在Java里，果然万物皆可“反射”（滑稽），即使是类中定义的<code>private</code>私有方法，也能被抠出来执行了，简直引起舒适了。</p>
+<h2 id="单例模式增强"><a href="#单例模式增强" class="headerlink" title="单例模式增强"></a><strong>单例模式增强</strong></h2><p>一个容易被忽略的问题是：<strong>可序列化的单例类有可能并不单例</strong>！</p>
+<p>举个代码小例子就清楚了。</p>
+<p>比如这里我们先用<code>java</code>写一个常见的「静态内部类」方式的单例模式实现：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">public class Singleton implements Serializable &#123;</span><br><span class="line"></span><br><span class="line">    private static final long serialVersionUID = -1576643344804979563L;</span><br><span class="line"></span><br><span class="line">    private Singleton() &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    private static class SingletonHolder &#123;</span><br><span class="line">        private static final Singleton singleton = new Singleton();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static synchronized Singleton getSingleton() &#123;</span><br><span class="line">        return SingletonHolder.singleton;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后写一个验证主函数：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">public class Test2 &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws IOException, ClassNotFoundException &#123;</span><br><span class="line"></span><br><span class="line">        ObjectOutputStream objectOutputStream =</span><br><span class="line">                new ObjectOutputStream(</span><br><span class="line">                    new FileOutputStream( new File(&quot;singleton.txt&quot;) )</span><br><span class="line">                );</span><br><span class="line">        // 将单例对象先序列化到文本文件singleton.txt中</span><br><span class="line">        objectOutputStream.writeObject( Singleton.getSingleton() );</span><br><span class="line">        objectOutputStream.close();</span><br><span class="line"></span><br><span class="line">        ObjectInputStream objectInputStream =</span><br><span class="line">                new ObjectInputStream(</span><br><span class="line">                    new FileInputStream( new File(&quot;singleton.txt&quot;) )</span><br><span class="line">                );</span><br><span class="line">        // 将文本文件singleton.txt中的对象反序列化为singleton1</span><br><span class="line">        Singleton singleton1 = (Singleton) objectInputStream.readObject();</span><br><span class="line">        objectInputStream.close();</span><br><span class="line"></span><br><span class="line">        Singleton singleton2 = Singleton.getSingleton();</span><br><span class="line"></span><br><span class="line">        // 运行结果竟打印 false ！</span><br><span class="line">        System.out.println( singleton1 == singleton2 );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行后我们发现：<strong>反序列化后的单例对象和原单例对象并不相等</strong>了，这无疑没有达到我们的目标。</p>
+<p><strong>解决办法是</strong>：在单例类中手写<code>readResolve()</code>函数，直接返回单例对象，来规避之：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">private Object readResolve() &#123;</span><br><span class="line">    return SingletonHolder.singleton;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://pic4.zhimg.com/50/v2-a2eb19f73a2ac3365bb368f10ca0635d_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic4.zhimg.com/80/v2-a2eb19f73a2ac3365bb368f10ca0635d_720w.jpg?source=1940ef5c" alt="img"></p>
+<p>这样一来，当反序列化从流中读取对象时，<code>readResolve()</code>会被调用，用其中返回的对象替代反序列化新建的对象。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Serializable</tag>
+      </tags>
+  </entry>
+</search>
