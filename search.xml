@@ -224,6 +224,9 @@
 
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>AQS是并发编程中比较难的一个类，但是理解AQS非常重要，因为它是JDK中锁和其他同步工具实现的基础</p>
 ]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
       <tags>
         <tag>AQS</tag>
       </tags>
