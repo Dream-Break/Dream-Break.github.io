@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"dream-break.gitee.io","root":"/blog/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Java volatile关键字详解">
+<meta property="og:type" content="article">
+<meta property="og:title" content="volatile关键字">
+<meta property="og:url" content="http://dream-break.gitee.io/2021/03/23/volatile/index.html">
+<meta property="og:site_name" content="Q的博客">
+<meta property="og:description" content="Java volatile关键字详解">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tcs.teambition.net/storage/3123a66b1b8f83d6bf3b1fd3b27235a1425e?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNhNjZiMWI4ZjgzZDZiZjNiMWZkM2IyNzIzNWExNDI1ZSJ9.a1RIrZ4CNkdkqFYvKgkkTYLhbqq7HGao9YpIoCfTMzQ">
+<meta property="og:image" content="https://tcs.teambition.net/storage/312375a3cc8f7a30abe4a28da0e641ca6e87?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM3NWEzY2M4ZjdhMzBhYmU0YTI4ZGEwZTY0MWNhNmU4NyJ9.oAl0IadzNbAwYxpnCZMMS4lXPIKe0ZeU0sbZC0jui_0">
+<meta property="og:image" content="https://tcs.teambition.net/storage/31239bb8c904d50a5b5d0c8667124423014e?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM5YmI4YzkwNGQ1MGE1YjVkMGM4NjY3MTI0NDIzMDE0ZSJ9.JT0aUDnk_3LNbi2Mh3i5gCHqceGWqlfqDDnIFLjM1Yc">
+<meta property="og:image" content="https://tcs.teambition.net/storage/3123f5ae619cf8291596ac325cd1e6b4f9c5?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNmNWFlNjE5Y2Y4MjkxNTk2YWMzMjVjZDFlNmI0ZjljNSJ9.p6R_JBUFRFUQp8B4fJySDu5PLLOrXGCQLNzwOduFn5g">
+<meta property="og:image" content="https://tcs.teambition.net/storage/31231da51999ef7656daac49d517673bfc93?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjMxZGE1MTk5OWVmNzY1NmRhYWM0OWQ1MTc2NzNiZmM5MyJ9.fIwp50xili2EKHnJF9pUgU7hipgkCZTgjQwyJmdST3M">
+<meta property="og:image" content="https://tcs.teambition.net/storage/3123c3ac08c811b3b0b1a891612ae1a819f0?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNjM2FjMDhjODExYjNiMGIxYTg5MTYxMmFlMWE4MTlmMCJ9.MJD52pSnTyKeqieAeHPqxBUINqo1Rnk3wDKTApNCcMk">
+<meta property="article:published_time" content="2021-03-23T03:31:14.000Z">
+<meta property="article:modified_time" content="2021-03-23T03:34:31.599Z">
+<meta property="article:author" content="Q">
+<meta property="article:tag" content="vloatile">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcs.teambition.net/storage/3123a66b1b8f83d6bf3b1fd3b27235a1425e?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNhNjZiMWI4ZjgzZDZiZjNiMWZkM2IyNzIzNWExNDI1ZSJ9.a1RIrZ4CNkdkqFYvKgkkTYLhbqq7HGao9YpIoCfTMzQ">
+
+<link rel="canonical" href="http://dream-break.gitee.io/2021/03/23/volatile/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>volatile关键字 | Q的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Q的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://dream-break.gitee.io/2021/03/23/volatile/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
+      <meta itemprop="name" content="Q">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Q的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          volatile关键字
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-23 11:31:14 / 修改时间：11:34:31" itemprop="dateCreated datePublished" datetime="2021-03-23T11:31:14+08:00">2021-03-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Java volatile关键字详解</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h1><p>在面试中，对于多线程经常会用到volatile关键字，关于volatile，大多人只知道它可以<strong>保持可见性、禁止指令重排序</strong>，但再往深问，具体是如何实现的，在什么场景下使用，为什么不直接使用synchronized关键字。</p>
+<h1 id="系统处理效率与Java内存模型"><a href="#系统处理效率与Java内存模型" class="headerlink" title="系统处理效率与Java内存模型"></a>系统处理效率与Java内存模型</h1><p>在计算机中，每条程序指令都是在CPU中执行的，而CPU执行指令的数据都是临时存储在内存中的，但是CPU的读取速度远超内存的读取速度，如果所有的CPU指令都从内存读取会大大降低效率，<strong>所有现代计算机系统都不得不加入一层或多层读写速度尽可能接近处理器的高速缓存（Cache）来作为处理器与内存中间的缓冲。</strong></p>
+<p>将运算需要使用的数据复制到缓存中，让运算能快速进行，当运算结束后，再从缓存同步到内存中，这样处理器就无需等待缓慢的内存读写了。</p>
+<p>虽然增加了高速缓冲提升了处理器的处理效率，但也带来了新的问题：</p>
+<p>现代计算机都是多核CPU，一开始，内存中的变量A的值是1，第一个CPU读取了数据，第二个CPU也将数据读取到了自己的高速缓存当中，当第一个CPU对变量A进行加1操作时，变量A的值变成了2，然后将将变量A的值写回内存中，这时第二个CPU也对变量A进行加1操作时，由于第二个CPU中高速缓存中的值还是1，所以加1操作后的结果为2，然后第二个CPU又将变量A的值同步回内存中，这样就导致执行了两次加1操作后，变量A的值最终是2，而不是3。<strong>这种被多个CPU访问的变量，通常称为共享变量。</strong>而产生的上面的问题，就是引入了高速缓存后的，主内存和缓存内容不一致的问题。因为每个处理器有自己的高速缓存，但是它们又共享同一块主内存，所以必然会出现主内存不知该以哪个高速缓存中的变量为准的情况。</p>
+<p><img src="https://tcs.teambition.net/storage/3123a66b1b8f83d6bf3b1fd3b27235a1425e?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNhNjZiMWI4ZjgzZDZiZjNiMWZkM2IyNzIzNWExNDI1ZSJ9.a1RIrZ4CNkdkqFYvKgkkTYLhbqq7HGao9YpIoCfTMzQ" alt="img"></p>
+<p>上面这个缓存不一致的问题，我们先记下来，继续来看Java内存模型，其实Java内存模型描述的上面讲的计算机系统高速缓存和内存之间的关系类似。</p>
+<p>Java内存模型描述了，<strong>各种变量的访问规则，以及将变量存储到内存和从内存读取变量的这种底层细节。</strong></p>
+<p>在Java内存模型中关注的变量都是共享变量（实例变量、类变量）。所有的共享变量都是存储在<strong>主内存</strong>中的，但是每个线程在访问变量的时候也都会在自己的<strong>工作内存</strong>（<strong>处理器高速缓存</strong>）中保留一份共享变量的副本。</p>
+<h1 id="Java内存模型（Java-Memory-Model，简称JMM）"><a href="#Java内存模型（Java-Memory-Model，简称JMM）" class="headerlink" title="Java内存模型（Java Memory Model，简称JMM）"></a>Java内存模型（Java Memory Model，简称JMM）</h1><p>线程对变量的所有操作（读，写）都必须在工作内存中进行，不能直接操作主内存中的数据。不同线程之间 也不能直接访问对方工作内存中的变量，线程间的变量值传递必须通过主内存进行中转传递。在JMM中工作内存和主内存的关系如下图：<img src="https://tcs.teambition.net/storage/312375a3cc8f7a30abe4a28da0e641ca6e87?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM3NWEzY2M4ZjdhMzBhYmU0YTI4ZGEwZTY0MWNhNmU4NyJ9.oAl0IadzNbAwYxpnCZMMS4lXPIKe0ZeU0sbZC0jui_0" alt="img"></p>
+<h1 id="Volatile可见性"><a href="#Volatile可见性" class="headerlink" title="Volatile可见性"></a>Volatile可见性</h1><p>继续我们上面的缓存一致性的问题，这个问题，在Java内存模型中，就是可见性的问题，即一个线程修改了共享变量的值，对另一个线程来说是不是立即可见的。如果不是立即可见的，那么就会出现缓存一致性的问题，如果是立即可见的，那么另一个线程在进行操作的时候，拿到的变量值就是最新的。就可以解决可见性的问题。</p>
+<h1 id="如何解决可见性问题"><a href="#如何解决可见性问题" class="headerlink" title="如何解决可见性问题"></a>如何解决可见性问题</h1><h2 id="方案一：加锁"><a href="#方案一：加锁" class="headerlink" title="方案一：加锁"></a>方案一：加锁</h2><p>将共享变量加锁，无论是synchronized还是Lock都可以，加锁达到的目的是在同一时间内只能有一个线程能对共享变量进行操作，就是说，共享变量从读取到工作内存到更新值后，同步回主内存的过程中，其他线程是操作不了这个变量的。这样自然就解决了可见性的问题了，但是这样的效率比较低，操作不了共享变量的线程就只能阻塞。</p>
+<h2 id="方案二：使用Voaltile修饰共享变量"><a href="#方案二：使用Voaltile修饰共享变量" class="headerlink" title="方案二：使用Voaltile修饰共享变量"></a>方案二：使用Voaltile修饰共享变量</h2><p>当一个共享变量被volatile修饰后，会保证每个线程将变量修改后的值立即同步回主内存中，当其他线程有需要读取变量时会读取到最新的变量值。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">被volatile修饰的变量，在被线程操作时，会有这样的机制</span><br></pre></td></tr></table></figure>
+
+<p>就是线程对变量操作时会从主内存中读取到自己的工作内存中，当线程对变量进行了修改后，那么其他已经读取了此变量的线程中的变量副本就会失效，这样其他线程在使用变量的时候，发现已经失效，那么就会去主内存中重新获取，这样获取到的就只最新的值了。</p>
+<h3 id="volatile具体如何实现"><a href="#volatile具体如何实现" class="headerlink" title="volatile具体如何实现"></a>volatile具体如何实现</h3><p>因为一台计算机有多台CPU，同一个变量，在多个CPU中缓存的值有可能不一样，那么以谁缓存的值为准呢？</p>
+<p>既然大家都有自己的值，那么各个CPU间就产生了一种协议，来保证按照一定的规律为准，来确定共享变量的准确值，这样各个CPU在读写共享变量时都按照协议来操作。</p>
+<p>这就是缓存一致性协议。</p>
+<p>最著名的缓存一致性协议就是Intel的MESI了，说MESI时，先解释一下，缓存行：</p>
+<blockquote>
+<p>缓存行（cache line）：CPU高速缓存的中可以分配的最小存储单位，高速缓存中的变量都是存在缓存行中的。</p>
+</blockquote>
+<p><strong>MESI的核心思想就是，当CPU对变量进行写操作时发现，变量是共享变量，那么就会通知其他CPU中将该变量的缓存行设置为无效状态。当其他CPU在操作变量时发现此变量在的缓存行已经无效，那么就会去主内存中重新读取最新的变量。</strong></p>
+<ul>
+<li><strong>那么其他CPU是如何发现变量被修改了的呢？</strong></li>
+</ul>
+<p>因为CPU和其他部件的进行通信是通过总线来进行的，所以每个CPU通过嗅探总线上的传播数据，来检查自己缓存的值是不是过期了，当处理器发现自己换成行对应的内存地址被修改后，就会将自己工作内存中的缓存行设置成无效状态，当CPU对此变量进行修改时会重新从系统主内存中读取变量。</p>
+<p><img src="https://tcs.teambition.net/storage/31239bb8c904d50a5b5d0c8667124423014e?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM5YmI4YzkwNGQ1MGE1YjVkMGM4NjY3MTI0NDIzMDE0ZSJ9.JT0aUDnk_3LNbi2Mh3i5gCHqceGWqlfqDDnIFLjM1Yc" alt="img"></p>
+<h2 id="Volatile的有序性（禁止指令重排序）"><a href="#Volatile的有序性（禁止指令重排序）" class="headerlink" title="Volatile的有序性（禁止指令重排序）"></a>Volatile的有序性（禁止指令重排序）</h2><p>一般来说，我们写程序的时候，都是要把先代码从上往下写，默认的认为程序是自顶向下顺序执行的，但是CPU为了提高效率，在保证最终结果准确的情况下，是会对指令进行重新排序的。就是说写在前的代码不一定先执行，在后面的也不一定晚执行。</p>
+<p>举个例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> a = <span class="number">5</span>; <span class="comment">// 代码1</span></span><br><span class="line"><span class="keyword">int</span> b = <span class="number">8</span>; <span class="comment">// 代码2</span></span><br><span class="line">a = a + <span class="number">4</span>;	<span class="comment">// 代码3</span></span><br><span class="line"><span class="keyword">int</span> c = a + b;	<span class="comment">// 代码4</span></span><br></pre></td></tr></table></figure>
+
+<p>上面四行代码的执行顺序有可能是</p>
+<p><img src="https://tcs.teambition.net/storage/3123f5ae619cf8291596ac325cd1e6b4f9c5?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNmNWFlNjE5Y2Y4MjkxNTk2YWMzMjVjZDFlNmI0ZjljNSJ9.p6R_JBUFRFUQp8B4fJySDu5PLLOrXGCQLNzwOduFn5g" alt="img"></p>
+<p>JMM在是允许指令重排序的，在保证最后结果正确的情况下，处理器可以尽情地发挥，提高执行效率。</p>
+<p>当多个线程执行代码的时候重排序的情况就更为突出了，各个CPU为了提高自己的效率，有可能会产生竞争情况，这样就有可能导致最终执行的正确性。</p>
+<p>所以为了保证在多个线程下最终执行的正确性，将变量用volatile进行修饰，这样就会达到禁止指令重排序的效果（其实也可以通过加锁，还有一些其他已知规则来实现禁止指令重排序，但是我们这里只讨论volatile的实现方式）。</p>
+<h3 id="volatile如何实现指令重排序"><a href="#volatile如何实现指令重排序" class="headerlink" title="volatile如何实现指令重排序"></a>volatile如何实现指令重排序</h3><p>答案是：<strong>内存屏障</strong></p>
+<p><strong>内存屏障</strong>是一组CPU指令，用于实现对内存操作的顺序限制。Java编译器，会在生成指令系列时，在适当的位置会插入内存屏障来禁止处理器对指令的重新排序。</p>
+<p>volatile会在变量写操作的前后加入两个内存屏障，来保证前面的写指令和后面的读指令是有序的。</p>
+<p><img src="https://tcs.teambition.net/storage/31231da51999ef7656daac49d517673bfc93?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjMxZGE1MTk5OWVmNzY1NmRhYWM0OWQ1MTc2NzNiZmM5MyJ9.fIwp50xili2EKHnJF9pUgU7hipgkCZTgjQwyJmdST3M" alt="img"></p>
+<p>volatile在变量的读操作后面插入两个指令，禁止后面的读指令和写指令重排序。</p>
+<p><img src="https://tcs.teambition.net/storage/3123c3ac08c811b3b0b1a891612ae1a819f0?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNjM2FjMDhjODExYjNiMGIxYTg5MTYxMmFlMWE4MTlmMCJ9.MJD52pSnTyKeqieAeHPqxBUINqo1Rnk3wDKTApNCcMk" alt="img"></p>
+<p>有序性，不仅只有volatile能保证，其他的实现方式也能保证，但是如果每一种实现方式都要了解那对于开发人员来说就比较困难了。</p>
+<p><strong>所以从JDK5就出现了happen-before原则，也叫先行发生原则。</strong>先行发生原则总结起来就是：<strong>如果一个操作A的产生的影响能被另一个操作B观察到，那么可以说，这个操作A先行发生与操作B。</strong></p>
+<p>这里所说的影响包括内存中的变量的修改，调用了方法，发送量消息等。</p>
+<p><strong>volatile中的先行发生原则是，对一个<strong><strong>volatile</strong></strong>变量的写操作，先行发生于后面任何地方对这个变量的读操作。</strong></p>
+<h1 id="Volatile无法保证原子性"><a href="#Volatile无法保证原子性" class="headerlink" title="Volatile无法保证原子性"></a><strong>Volatile无法保证原子性</strong></h1><p>原子性，是指一个操作过程要么都成功，要么都失败，是一个独立的完整的。</p>
+<p>就像上面说的，如果多个线程对一个变量进行累加，那么肯定得不到想要的结果，因为累加就不是一个原子操作。</p>
+<p>要保证累加最终结果正确，要么对累加变量加锁，要么就用AotomicInteger这样的变量。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 双重检查加锁式单例</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DoubleCheckLockSingleton</span> <span class="keyword">implements</span> <span class="title">Serializable</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 静态变量，用来存放实例。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">static</span> DoubleCheckLockSingleton doubleCheckLockSingleton = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 私有化构造方法，禁止外部创建实例。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">DoubleCheckLockSingleton</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 双重检查加锁的方式保证线程安全又能获得到唯一实例</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> DoubleCheckLockSingleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="comment">//第一次检查实例是否已经存在，不存在则进入代码块</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">null</span> == doubleCheckLockSingleton)&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (DoubleCheckLockSingleton.class)&#123;</span><br><span class="line">                <span class="comment">//第二次检查</span></span><br><span class="line">                <span class="keyword">if</span>(<span class="keyword">null</span>==doubleCheckLockSingleton)&#123;</span><br><span class="line">                    doubleCheckLockSingleton = <span class="keyword">new</span> DoubleCheckLockSingleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> doubleCheckLockSingleton;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为什么要进行双重检查呢？当第一个线程走到第一次检查时发现对象为空，然后进入锁，第二次就检查时也为空，那么就去创建对象，但是这个时候又来了一个线程来到了第一次检查，发现为空，但是这个时候因为锁被占用，所以就只能阻塞等待，然后第一个线程创建对象成功了，由于对象是被volatile修饰的能够立即反馈到其他线程上，所以在第一个线程释放锁之后，第二个线程进入了锁，然后进行第二次检查时，发现对象已经被创建了，那么就不在创建对象了。从而保证的单例。</p>
+<p>还有就是如果创建对象，步骤：</p>
+<ol>
+<li>分配内存空间。</li>
+<li>调用构造器，实例化。</li>
+<li>返回内存地址给引用。</li>
+</ol>
+<p>如果这三个指令顺序被重排了，那么当多线程来获取对象的时候就会造成对象虽然实例化了，但是没有分配内存空间，会有空指针的风险。所以加上了volatile的对象，也保证了在第二次检查时不会被已经在创建过程中的对象有被检测为空的风险。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>volatile可以看做轻量级的synchronized，虽然volatile无法保证原子性，但是如果在多线程下的操作本身就是原子性操作（例如赋值操作），那么使用volatile会优于synchronized。</p>
+<p>volatile可以适用于某个标志的flag，一旦被修改就需要被其他线程立即可见，可以修饰为触发器的变量，一旦变量被修改就触发某种操作。</p>
+<p>volatile变量的写操作由于happen-before原则，一定会发生在读之前。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/vloatile/" rel="tag"># vloatile</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/2021/03/22/ArrayList/" rel="prev" title="ArrayList解析">
+      <i class="fa fa-chevron-left"></i> ArrayList解析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/2021/03/23/sychronized/" rel="next" title="sychronized关键字">
+      sychronized关键字 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BA%8F%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">序言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E5%A4%84%E7%90%86%E6%95%88%E7%8E%87%E4%B8%8EJava%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">系统处理效率与Java内存模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%88Java-Memory-Model%EF%BC%8C%E7%AE%80%E7%A7%B0JMM%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">Java内存模型（Java Memory Model，简称JMM）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Volatile%E5%8F%AF%E8%A7%81%E6%80%A7"><span class="nav-number">4.</span> <span class="nav-text">Volatile可见性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%8F%AF%E8%A7%81%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-number">5.</span> <span class="nav-text">如何解决可见性问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E4%B8%80%EF%BC%9A%E5%8A%A0%E9%94%81"><span class="nav-number">5.1.</span> <span class="nav-text">方案一：加锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E4%BA%8C%EF%BC%9A%E4%BD%BF%E7%94%A8Voaltile%E4%BF%AE%E9%A5%B0%E5%85%B1%E4%BA%AB%E5%8F%98%E9%87%8F"><span class="nav-number">5.2.</span> <span class="nav-text">方案二：使用Voaltile修饰共享变量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#volatile%E5%85%B7%E4%BD%93%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.2.1.</span> <span class="nav-text">volatile具体如何实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Volatile%E7%9A%84%E6%9C%89%E5%BA%8F%E6%80%A7%EF%BC%88%E7%A6%81%E6%AD%A2%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92%E5%BA%8F%EF%BC%89"><span class="nav-number">5.3.</span> <span class="nav-text">Volatile的有序性（禁止指令重排序）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#volatile%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%8C%87%E4%BB%A4%E9%87%8D%E6%8E%92%E5%BA%8F"><span class="nav-number">5.3.1.</span> <span class="nav-text">volatile如何实现指令重排序</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Volatile%E6%97%A0%E6%B3%95%E4%BF%9D%E8%AF%81%E5%8E%9F%E5%AD%90%E6%80%A7"><span class="nav-number">6.</span> <span class="nav-text">Volatile无法保证原子性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Q"
+      src="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
+  <p class="site-author-name" itemprop="name">Q</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Q</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/pisces.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/blog/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>

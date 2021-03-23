@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"dream-break.gitee.io","root":"/blog/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Java sychronized关键字详解">
+<meta property="og:type" content="article">
+<meta property="og:title" content="sychronized关键字">
+<meta property="og:url" content="http://dream-break.gitee.io/2021/03/23/sychronized/index.html">
+<meta property="og:site_name" content="Q的博客">
+<meta property="og:description" content="Java sychronized关键字详解">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tcs.teambition.net/storage/31234eba51099fa3374096f613c766821cf4?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM0ZWJhNTEwOTlmYTMzNzQwOTZmNjEzYzc2NjgyMWNmNCJ9.JVbkQS1NNg47vEuR0KhjRGfZWZSX6T_xpwl4x5rTwRM">
+<meta property="og:image" content="https://tcs.teambition.net/storage/3123a5434e73646fdd6a3582c5554f492abb?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNhNTQzNGU3MzY0NmZkZDZhMzU4MmM1NTU0ZjQ5MmFiYiJ9.rJzTkMi0uW5aNtZSky5Y6FwRaDewDtNKB_dUjhdQJXU">
+<meta property="og:image" content="https://tcs.teambition.net/storage/3123387c9b51a96c5981a4b651c343138683?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjMzODdjOWI1MWE5NmM1OTgxYTRiNjUxYzM0MzEzODY4MyJ9.-FOyDRaBzr2hcNKOHdg9GXaRW_yn4G7qMlr0TbYdHZc">
+<meta property="og:image" content="https://tcs.teambition.net/storage/3123dfb4a69bbe5bf80415278f02848fbf27?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNkZmI0YTY5YmJlNWJmODA0MTUyNzhmMDI4NDhmYmYyNyJ9.AziU5OTXD788NSeoWSUMLZTq17S7XB2eUr2n8QJzTv8">
+<meta property="og:image" content="https://tcs.teambition.net/storage/312353a8974ae1480a745dd6d8524949ccf3?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM1M2E4OTc0YWUxNDgwYTc0NWRkNmQ4NTI0OTQ5Y2NmMyJ9.tzORXP7GN-iRP-ET9QFFwMQwwzVrO7MxNDb3ujATaz4">
+<meta property="og:image" content="https://tcs.teambition.net/storage/312348932a4ddf20a9f633ebe165c40c7e75?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM0ODkzMmE0ZGRmMjBhOWY2MzNlYmUxNjVjNDBjN2U3NSJ9.rmcetSzA6nJovoHS24jX1OoOKKQW87ESP1NZ8fOmAis">
+<meta property="og:image" content="https://tcs.teambition.net/storage/31232ab971bc41c6d7fbf164782dad8cf67a?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjMyYWI5NzFiYzQxYzZkN2ZiZjE2NDc4MmRhZDhjZjY3YSJ9.0p_zMSTKi3V2SM4gwXZRbVfHNHdlHdiavjvu3bmqAOA">
+<meta property="article:published_time" content="2021-03-23T03:34:43.000Z">
+<meta property="article:modified_time" content="2021-03-23T03:37:59.504Z">
+<meta property="article:author" content="Q">
+<meta property="article:tag" content="sychronized">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tcs.teambition.net/storage/31234eba51099fa3374096f613c766821cf4?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM0ZWJhNTEwOTlmYTMzNzQwOTZmNjEzYzc2NjgyMWNmNCJ9.JVbkQS1NNg47vEuR0KhjRGfZWZSX6T_xpwl4x5rTwRM">
+
+<link rel="canonical" href="http://dream-break.gitee.io/2021/03/23/sychronized/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>sychronized关键字 | Q的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a target="_blank" rel="noopener" href="https://github.com" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Q的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://dream-break.gitee.io/2021/03/23/sychronized/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
+      <meta itemprop="name" content="Q">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Q的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          sychronized关键字
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-23 11:34:43 / 修改时间：11:37:59" itemprop="dateCreated datePublished" datetime="2021-03-23T11:34:43+08:00">2021-03-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">Java sychronized关键字详解</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Synchronized作用"><a href="#Synchronized作用" class="headerlink" title="Synchronized作用"></a>Synchronized作用</h1><ul>
+<li>原子性：synchronized保证语句块内操作是原子的</li>
+<li>可见性：synchronized保证可见性（通过“在执行unlock之前，必须先把此变量同步回主内存”实现）</li>
+<li>有序性：synchronized保证有序性（通过“一个变量在同一时刻只允许一条线程对其进行lock操作”）</li>
+</ul>
+<h1 id="Synchronized使用场景"><a href="#Synchronized使用场景" class="headerlink" title="Synchronized使用场景"></a>Synchronized使用场景</h1><p>Synchronized可以使用在方法上与代码块上，两者之间的区别为：</p>
+<h2 id="方法上"><a href="#方法上" class="headerlink" title="方法上"></a><strong>方法上</strong></h2><p>使用在静态方法上时，Synchronized锁住的是类对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">	System.out.println(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用在实例方法上时，Synchronized锁住的是实例对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">	System.out.println(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="代码块上"><a href="#代码块上" class="headerlink" title="代码块上"></a><strong>代码块上</strong></h2><p>在代码块中填写this，会锁住实例对象，直到执行完方法后才会释放</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">synchronized</span>(<span class="keyword">this</span>)&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在代码块中填写类名.Class会锁住该类的类对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">synchronized</span>(Test.Class)&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;test&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在代码块中填写任意实例对象，会锁住填入的实例对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> String url;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">synchronized</span>(url)&#123;</span><br><span class="line">		System.out.println(url);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Synchronized原理"><a href="#Synchronized原理" class="headerlink" title="Synchronized原理"></a>Synchronized原理</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> String myName = <span class="string">&quot;hehe&quot;</span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">		Synchronized(myName)&#123;</span><br><span class="line">			System.out.println(<span class="string">&quot;myName&quot;</span>);		</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> satatic <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;Synchronized&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上代码包含一个synchronized代码块玉一个synchronized的静态方法，将其编译后的class文件反编译后得到如下内容，注意标红处。</p>
+<h2 id="代码块"><a href="#代码块" class="headerlink" title="代码块"></a><strong>代码块</strong></h2><p><img src="https://tcs.teambition.net/storage/31234eba51099fa3374096f613c766821cf4?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM0ZWJhNTEwOTlmYTMzNzQwOTZmNjEzYzc2NjgyMWNmNCJ9.JVbkQS1NNg47vEuR0KhjRGfZWZSX6T_xpwl4x5rTwRM" alt="img"></p>
+<p>Synchronized关键字经过javac编译后，会在同步块的前后生成monitorenter和monitorexit两个字节码指令。根据《Java虚拟机规范》的要求，在执行monitorenter指令时，首先要尝试获取对象的锁（<strong>获取对象锁的过程，其实是获取monitor对象的所有权的过程</strong>）</p>
+<p>如果这个对象没有锁定或当前线程已经持有那个对象的锁，就会把锁的计数器加一，在执行monitorexit命令时，锁计数器减一，一旦计算器为0，锁会被释放。</p>
+<p>如果获取对象锁失败，那当前线程就应当被阻塞等待，直到请求锁定的对象被持有他的线程释放。</p>
+<h2 id="同步方法"><a href="#同步方法" class="headerlink" title="同步方法"></a><strong>同步方法</strong></h2><p><img src="https://tcs.teambition.net/storage/3123a5434e73646fdd6a3582c5554f492abb?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNhNTQzNGU3MzY0NmZkZDZhMzU4MmM1NTU0ZjQ5MmFiYiJ9.rJzTkMi0uW5aNtZSky5Y6FwRaDewDtNKB_dUjhdQJXU" alt="img"></p>
+<p>注意红框标注的ACC_SYNCHRONIZED标志，当线程执行方法时会检测是否存在这个标志，如果存在会隐式调用monitorenter与monitorexit命令将方法锁住。</p>
+<h1 id="monitor对象"><a href="#monitor对象" class="headerlink" title="monitor对象"></a>monitor对象</h1><p>在前面说过，获取对象锁的过程就是获取monitor对象的所有权，哪个对象持有了monitor对象，那个线程就获得了锁，获得锁后可以重复获取monitor对象，但同一个线程每获取一次monitor对象，锁计数器就会加一，在解锁的时候就需要将计算器减为0才会释放。monitor对象在反编译代码中并不显示，这个对象存放在对象头中。</p>
+<h2 id="对象头"><a href="#对象头" class="headerlink" title="对象头"></a><strong>对象头</strong></h2><p>在HotSpot虚拟机中，对象在堆内存的存储布局为：对象头（Header）、实例数据（InstanceData）、对齐填充（Padding）</p>
+<p>实例数据中存储的是对象的真正有效数据，里面包含各种类型的字段内容，无论是本身的还是继承的。</p>
+<p>对齐填充非必须存在，只是为了占位，虚拟机自动管理内存系统要求对象的大小必须是8的整倍数，当对象大小不足时，会用对齐填充补齐。</p>
+<p>对象头包含两部分信息：</p>
+<p>1、自身运行时数据：hashcode、GC分代年龄、<strong>锁状态标志</strong>、<strong>线程持有的锁</strong>、<strong>偏向线程ID</strong>等，这部分数据官方名为“<strong>Mark Word</strong>”</p>
+<p>2、类型指针，即对象指向它的类型元数据的指针，虚拟机通过它来确定对象是哪个类型的实例。</p>
+<p>3、如果是数组对象，会存储数组长度。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>虚拟机位数</td>
+<td>对象头结构</td>
+<td>描述</td>
+</tr>
+<tr>
+<td>32位/64位</td>
+<td>Mark Word</td>
+<td>存储对象的哈希码、GC分代年龄、锁信息等</td>
+</tr>
+<tr>
+<td>32位/64位</td>
+<td>Class MetaData Address</td>
+<td>指向对象类型数据的指针</td>
+</tr>
+<tr>
+<td>32位/64位</td>
+<td>数组长度</td>
+<td>如果是数组对象的话，有这一部分，否则没有</td>
+</tr>
+</tbody></table>
+<p>接着回到我们的monitor对象，monitor对象的源码是C++写的，在虚拟机的ObjectMonitor.hpp文件中。数据结构长这个样子。</p>
+<p><img src="https://tcs.teambition.net/storage/3123387c9b51a96c5981a4b651c343138683?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjMzODdjOWI1MWE5NmM1OTgxYTRiNjUxYzM0MzEzODY4MyJ9.-FOyDRaBzr2hcNKOHdg9GXaRW_yn4G7qMlr0TbYdHZc" alt="img"></p>
+<p>有想对这个monitor对象更深入了解的可以去Java虚拟机的源码里看看。</p>
+<h1 id="重量级锁"><a href="#重量级锁" class="headerlink" title="重量级锁"></a>重量级锁</h1><p>在主流的Java虚拟机实现中，Java线程是映射到操作系统的原生内核线程上的，如果要阻塞或唤醒一条线程，则需要操作系统配合，这就不可避免地陷入用户态与核心态的转换中，这种状态的转换非常耗时，所以在ObjectMonitor文件中的调用过程和复杂的操作系统运行机制导致线程的阻塞或唤醒时是很耗费资源的。这样在JDK1.6之前都称synchronized为重量级锁。</p>
+<h2 id="重量级锁的减轻"><a href="#重量级锁的减轻" class="headerlink" title="重量级锁的减轻"></a><strong>重量级锁的减轻</strong></h2><p>高效并发是从JDK5到JDK6的一项重要改进，synchronized在升级后的整个加锁过程，大致如下图。</p>
+<p><img src="https://tcs.teambition.net/storage/3123dfb4a69bbe5bf80415278f02848fbf27?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNkZmI0YTY5YmJlNWJmODA0MTUyNzhmMDI4NDhmYmYyNyJ9.AziU5OTXD788NSeoWSUMLZTq17S7XB2eUr2n8QJzTv8" alt="img"></p>
+<p>注：<strong>锁升级的过程不可逆</strong></p>
+<h2 id="偏向锁"><a href="#偏向锁" class="headerlink" title="偏向锁"></a><strong>偏向锁</strong></h2><p>上方对头中说明存在一个偏向锁的线程ID，其含义为：如果一个线程获得锁后，锁的计数器就会加一，并且将这个线程的id存入锁住的这个对象的对象头中。</p>
+<p>这个过程是通过CAS来实现的，每次线程进入都是无锁的，当执行CAS成功后，直接将锁的计数器加一（持有偏向锁的线程以后每次进入锁时不做任何操作，计数器直接加一），这个时候其他现场再进来时，执行CAS就会失败，即获取锁失败。</p>
+<p><img src="https://tcs.teambition.net/storage/312353a8974ae1480a745dd6d8524949ccf3?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM1M2E4OTc0YWUxNDgwYTc0NWRkNmQ4NTI0OTQ5Y2NmMyJ9.tzORXP7GN-iRP-ET9QFFwMQwwzVrO7MxNDb3ujATaz4" alt="img"></p>
+<p>偏向锁在JDK1.6是默认开启的，通过参数进行关闭：xx:-UseBiasedLocking=false。</p>
+<p>偏向锁可以提高带有同步但无竞争的程序性能，但如果大多数的锁都被多个不同的线程访问，那偏向锁就是多余的。</p>
+<h2 id="轻量级锁"><a href="#轻量级锁" class="headerlink" title="轻量级锁"></a>轻量级锁</h2><p>轻量级锁与对象头的第一部分有关。</p>
+<p>在代码即将进入代码块时，如果此同步对象没有被锁定，虚拟机首先将当前线程的栈帧中建立一个名为锁记录（Lock Record）的空间，用于存储锁对象目前的Mark Word的拷贝。</p>
+<p>然后JVM将使用CAS操作尝试将对象的Mark Word更新为指向Lock Record的指针，如果这个更新动作成功了，说明线程获取锁成功，并执行后面的同步操作。如果这个更新动作失败了，说明锁对象已经被其他线程抢占了，那轻量级锁不在有效，必须膨胀为重量级锁。此时被锁住的对象标志变为重量级锁的标志。</p>
+<p><img src="https://tcs.teambition.net/storage/312348932a4ddf20a9f633ebe165c40c7e75?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM0ODkzMmE0ZGRmMjBhOWY2MzNlYmUxNjVjNDBjN2U3NSJ9.rmcetSzA6nJovoHS24jX1OoOKKQW87ESP1NZ8fOmAis" alt="img"></p>
+<h2 id="自旋锁"><a href="#自旋锁" class="headerlink" title="自旋锁"></a>自旋锁</h2><p>当轻量级锁获取失败后，就会升级为重量级锁，但是重量级锁是很费资源的，JVM团队注意到许多程序上，共享数据的二锁定状态之后持续很短一段时间，为了这段时间去挂起与恢复线程并不值得，<strong>所以想到了一个策略，那就是当线程请求一个已经被锁住的对象时，可以让未获取锁的线程“稍等一会”，但不放弃处理器执行时间，只需要让线程执行一个忙循环（自旋），这就是所谓的自旋锁。</strong>自旋锁在JDK1.4.2中引入，默认关闭，可以通过-XX:UserSpinning参数来开启，默认自旋次数是10次，用户可以自定义次数，配置参数是-XX:PreBockSpin。</p>
+<p>无论是用户指定还是默认值的自旋次数，对JVM重所有的锁来说都是相同的。在JDK6中引入了自适应自旋，根据前一次在同一锁上的自旋时间及拥有者的状态来决定。如果上一次同一个对象自旋锁获得成功了，那么再次进行自旋时就会认为成功几率很大，那么自旋次数就会自动增加。反之如果自旋很少成功获得锁，那么以后这个自旋过程都有可能被省略掉。</p>
+<p>这样在轻量级失败后，就会升级为自旋锁，如果自旋锁也失败了，那就只能是升级到重量级锁了。</p>
+<p><img src="https://tcs.teambition.net/storage/31232ab971bc41c6d7fbf164782dad8cf67a?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTMxMCwiaWF0IjoxNjE2NDcwNTEwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjMyYWI5NzFiYzQxYzZkN2ZiZjE2NDc4MmRhZDhjZjY3YSJ9.0p_zMSTKi3V2SM4gwXZRbVfHNHdlHdiavjvu3bmqAOA" alt="img"></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>Synchronized减重的过程，通常被称为锁膨胀或是锁升级的过程。主要步骤是：</p>
+<ol>
+<li>先是通过偏向锁来获取锁，解决了虽然有同步但无竞争的场景下锁的消耗。</li>
+<li>再是通过对象头的Mark Word来实现的轻量级锁，通过轻量级锁如果还有竞争，那么继续升级。</li>
+<li>升级为自旋锁，如果达到最大自旋次数了，那么就直接升级为重量级锁，所有未获取锁的线程都阻塞等待。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/sychronized/" rel="tag"># sychronized</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/2021/03/23/volatile/" rel="prev" title="volatile关键字">
+      <i class="fa fa-chevron-left"></i> volatile关键字
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Synchronized%E4%BD%9C%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">Synchronized作用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Synchronized%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">Synchronized使用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%B8%8A"><span class="nav-number">2.1.</span> <span class="nav-text">方法上</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%9D%97%E4%B8%8A"><span class="nav-number">2.2.</span> <span class="nav-text">代码块上</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Synchronized%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">Synchronized原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%9D%97"><span class="nav-number">3.1.</span> <span class="nav-text">代码块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E6%96%B9%E6%B3%95"><span class="nav-number">3.2.</span> <span class="nav-text">同步方法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#monitor%E5%AF%B9%E8%B1%A1"><span class="nav-number">4.</span> <span class="nav-text">monitor对象</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E5%A4%B4"><span class="nav-number">4.1.</span> <span class="nav-text">对象头</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%87%8D%E9%87%8F%E7%BA%A7%E9%94%81"><span class="nav-number">5.</span> <span class="nav-text">重量级锁</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E9%87%8F%E7%BA%A7%E9%94%81%E7%9A%84%E5%87%8F%E8%BD%BB"><span class="nav-number">5.1.</span> <span class="nav-text">重量级锁的减轻</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%81%8F%E5%90%91%E9%94%81"><span class="nav-number">5.2.</span> <span class="nav-text">偏向锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%BB%E9%87%8F%E7%BA%A7%E9%94%81"><span class="nav-number">5.3.</span> <span class="nav-text">轻量级锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E6%97%8B%E9%94%81"><span class="nav-number">5.4.</span> <span class="nav-text">自旋锁</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Q"
+      src="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
+  <p class="site-author-name" itemprop="name">Q</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Q</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/pisces.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/blog/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
