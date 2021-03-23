@@ -17,15 +17,15 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"dream-break.gitee.io","root":"/blog/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"dream-break.gitee.io","root":"/blog/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"b2t":true,"position":"left","scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="序列化与反序列化解析">
+  <meta name="description" content="序列化是干啥用的？序列化的原本意图是希望对一个Java对象作一下“变换”，变成字节序列，这样一来方便持久化存储到磁盘，避免程序运行结束后对象就从内存里消失，另外变换成字节序列也更便于网络运输和传播，所以概念上很好理解：  序列化：把Java对象转换为字节序列。 反序列化：把字节序列恢复为原先的Java对象。   而且序列化机制从某种意义上来说也弥补了平台化的一些差异，毕竟转换后的字节流可以在其他平">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java序列化有什么作用？序列化与不序列化有什么区别？">
 <meta property="og:url" content="http://dream-break.gitee.io/2021/03/19/Java-Serializable/index.html">
-<meta property="og:site_name" content="Q的博客">
-<meta property="og:description" content="序列化与反序列化解析">
+<meta property="og:site_name" content="o(&gt;ω&lt;)o">
+<meta property="og:description" content="序列化是干啥用的？序列化的原本意图是希望对一个Java对象作一下“变换”，变成字节序列，这样一来方便持久化存储到磁盘，避免程序运行结束后对象就从内存里消失，另外变换成字节序列也更便于网络运输和传播，所以概念上很好理解：  序列化：把Java对象转换为字节序列。 反序列化：把字节序列恢复为原先的Java对象。   而且序列化机制从某种意义上来说也弥补了平台化的一些差异，毕竟转换后的字节流可以在其他平">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://pic1.zhimg.com/50/v2-d5b7da5ee39eef8754554efb392e7668_hd.jpg?source=1940ef5c">
 <meta property="og:image" content="https://pic1.zhimg.com/80/v2-d5b7da5ee39eef8754554efb392e7668_720w.jpg?source=1940ef5c">
@@ -54,8 +54,8 @@
 <meta property="og:image" content="https://pic4.zhimg.com/50/v2-a2eb19f73a2ac3365bb368f10ca0635d_hd.jpg?source=1940ef5c">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-a2eb19f73a2ac3365bb368f10ca0635d_720w.jpg?source=1940ef5c">
 <meta property="article:published_time" content="2021-03-19T08:41:53.000Z">
-<meta property="article:modified_time" content="2021-03-22T12:25:19.052Z">
-<meta property="article:author" content="Q">
+<meta property="article:modified_time" content="2021-03-23T06:04:07.544Z">
+<meta property="article:author" content="Qの博客">
 <meta property="article:tag" content="Serializable">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://pic1.zhimg.com/50/v2-d5b7da5ee39eef8754554efb392e7668_hd.jpg?source=1940ef5c">
@@ -73,7 +73,7 @@
   };
 </script>
 
-  <title>Java序列化有什么作用？序列化与不序列化有什么区别？ | Q的博客</title>
+  <title>Java序列化有什么作用？序列化与不序列化有什么区别？ | o(>ω<)o</title>
   
 
 
@@ -124,9 +124,10 @@
 
     <a href="/blog/" class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">Q的博客</h1>
+      <h1 class="site-title">o(>ω<)o</h1>
       <span class="logo-line-after"><i></i></span>
     </a>
+      <p class="site-subtitle" itemprop="description">一位普通的java程序员(￣▽￣)ノ</p>
   </div>
 
   <div class="site-nav-right">
@@ -198,10 +199,6 @@
     </header>
 
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
 
 
     <main class="main">
@@ -220,12 +217,12 @@
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
-      <meta itemprop="name" content="Q">
-      <meta itemprop="description" content="">
+      <meta itemprop="name" content="Qの博客">
+      <meta itemprop="description" content="一位普通的java程序员(￣▽￣)ノ">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Q的博客">
+      <meta itemprop="name" content="o(>ω<)o">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -246,7 +243,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-03-22 20:25:19" itemprop="dateModified" datetime="2021-03-22T20:25:19+08:00">2021-03-22</time>
+                <time title="修改时间：2021-03-23 14:04:07" itemprop="dateModified" datetime="2021-03-23T14:04:07+08:00">2021-03-23</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -258,8 +255,21 @@
                 </span>
             </span>
 
-          
-            <div class="post-description">序列化与反序列化解析</div>
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
 
         </div>
       </header>
@@ -278,6 +288,8 @@
 <p><img src="https://pic1.zhimg.com/50/v2-d5b7da5ee39eef8754554efb392e7668_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic1.zhimg.com/80/v2-d5b7da5ee39eef8754554efb392e7668_720w.jpg?source=1940ef5c" alt="img"></p>
 <p>而且序列化机制从某种意义上来说也弥补了平台化的一些差异，毕竟转换后的字节流可以在其他平台上进行反序列化来恢复对象。</p>
 <p>事情就是那么个事情，看起来很简单，不过后面的东西还不少，请往下看。</p>
+<span id="more"></span>
+
 <hr>
 <h2 id="对象如何序列化？"><a href="#对象如何序列化？" class="headerlink" title="对象如何序列化？"></a><strong>对象如何序列化？</strong></h2><p>然而Java目前并没有一个关键字可以直接去定义一个所谓的“可持久化”对象。</p>
 <p>对象的持久化和反持久化需要靠程序员在代码里手动<strong>显式地</strong>进行序列化和反序列化还原的动作。</p>
@@ -377,14 +389,22 @@
 <p>这样一来，当反序列化从流中读取对象时，<code>readResolve()</code>会被调用，用其中返回的对象替代反序列化新建的对象。</p>
 
     </div>
-
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+	  
+	</div>
     
     
     
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/blog/tags/Serializable/" rel="tag"># Serializable</a>
+              <a href="/blog/tags/Serializable/" rel="tag"><i class="fa fa-tag"></i> Serializable</a>
           </div>
 
         
@@ -461,10 +481,10 @@
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="Q"
+    <img class="site-author-image" itemprop="image" alt="Qの博客"
       src="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
-  <p class="site-author-name" itemprop="name">Q</p>
-  <div class="site-description" itemprop="description"></div>
+  <p class="site-author-name" itemprop="name">Qの博客</p>
+  <div class="site-description" itemprop="description">一位普通的java程序员(￣▽￣)ノ</div>
 </div>
 <div class="site-state-wrap motion-element">
   <nav class="site-state">
@@ -493,6 +513,10 @@
 
 
       </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
 
     </div>
   </aside>
@@ -515,10 +539,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">Q</span>
+  <span class="author" itemprop="copyrightHolder">Qの博客</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">32k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">29 分钟</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
-  </div>
+
 
         
 
@@ -575,6 +608,6 @@
 
   
 
-</body>
+<script src="/blog/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":null,"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"display":null,"superSample":2,"width":200,"height":400,"position":"right","hOffset":0,"vOffset":-20,"mobile":null,"show":false,"react":null,"opacity":0.7,"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 </html>
 <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>

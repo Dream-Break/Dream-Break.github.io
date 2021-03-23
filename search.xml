@@ -5,6 +5,8 @@
     <url>/blog/2021/03/22/ArrayList/</url>
     <content><![CDATA[<h1 id="ArrayList集合"><a href="#ArrayList集合" class="headerlink" title="ArrayList集合"></a>ArrayList集合</h1><h2 id="ArrayList类图"><a href="#ArrayList类图" class="headerlink" title="ArrayList类图"></a>ArrayList类图</h2><p><img src="https://tcs.teambition.net/storage/31239f334b168e4eebefcd7c3a1b6906b9be?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzAyMDgzOSwiaWF0IjoxNjE2NDE2MDM5LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM5ZjMzNGIxNjhlNGVlYmVmY2Q3YzNhMWI2OTA2YjliZSJ9.uKhfZBuclOWsNPt_rj83943kz4ktgycaqlkRUagsLqE" alt="img"></p>
 <p>ArrayList的底层是由数组实现的，数组的特点是固定大小，而ArrayList实现了动态扩容。</p>
+<span id="more"></span>
+
 <p>ArrayList部分变量如下，在下面的分析中会用到这些变量</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 默认容量</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_CAPACITY = <span class="number">10</span>;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 空的对象数组</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Object[] EMPTY_ELEMENTDATA = &#123;&#125;;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 无参构造器创建的空数组</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = &#123;&#125;;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 存放数据的数组的缓存变量</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">transient</span> Object[] elementData;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 元素数量</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> size;</span><br></pre></td></tr></table></figure>
 
@@ -43,12 +45,92 @@
       </tags>
   </entry>
   <entry>
+    <title>volatile关键字</title>
+    <url>/blog/2021/03/23/volatile/</url>
+    <content><![CDATA[<h1 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h1><p>在面试中，对于多线程经常会用到volatile关键字，关于volatile，大多人只知道它可以<strong>保持可见性、禁止指令重排序</strong>，但再往深问，具体是如何实现的，在什么场景下使用，为什么不直接使用synchronized关键字。</p>
+<span id="more"></span>
+
+<h1 id="系统处理效率与Java内存模型"><a href="#系统处理效率与Java内存模型" class="headerlink" title="系统处理效率与Java内存模型"></a>系统处理效率与Java内存模型</h1><p>在计算机中，每条程序指令都是在CPU中执行的，而CPU执行指令的数据都是临时存储在内存中的，但是CPU的读取速度远超内存的读取速度，如果所有的CPU指令都从内存读取会大大降低效率，<strong>所有现代计算机系统都不得不加入一层或多层读写速度尽可能接近处理器的高速缓存（Cache）来作为处理器与内存中间的缓冲。</strong></p>
+<p>将运算需要使用的数据复制到缓存中，让运算能快速进行，当运算结束后，再从缓存同步到内存中，这样处理器就无需等待缓慢的内存读写了。</p>
+<p>虽然增加了高速缓冲提升了处理器的处理效率，但也带来了新的问题：</p>
+<p>现代计算机都是多核CPU，一开始，内存中的变量A的值是1，第一个CPU读取了数据，第二个CPU也将数据读取到了自己的高速缓存当中，当第一个CPU对变量A进行加1操作时，变量A的值变成了2，然后将将变量A的值写回内存中，这时第二个CPU也对变量A进行加1操作时，由于第二个CPU中高速缓存中的值还是1，所以加1操作后的结果为2，然后第二个CPU又将变量A的值同步回内存中，这样就导致执行了两次加1操作后，变量A的值最终是2，而不是3。<strong>这种被多个CPU访问的变量，通常称为共享变量。</strong>而产生的上面的问题，就是引入了高速缓存后的，主内存和缓存内容不一致的问题。因为每个处理器有自己的高速缓存，但是它们又共享同一块主内存，所以必然会出现主内存不知该以哪个高速缓存中的变量为准的情况。</p>
+<p><img src="https://tcs.teambition.net/storage/3123a66b1b8f83d6bf3b1fd3b27235a1425e?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNhNjZiMWI4ZjgzZDZiZjNiMWZkM2IyNzIzNWExNDI1ZSJ9.a1RIrZ4CNkdkqFYvKgkkTYLhbqq7HGao9YpIoCfTMzQ" alt="img"></p>
+<p>上面这个缓存不一致的问题，我们先记下来，继续来看Java内存模型，其实Java内存模型描述的上面讲的计算机系统高速缓存和内存之间的关系类似。</p>
+<p>Java内存模型描述了，<strong>各种变量的访问规则，以及将变量存储到内存和从内存读取变量的这种底层细节。</strong></p>
+<p>在Java内存模型中关注的变量都是共享变量（实例变量、类变量）。所有的共享变量都是存储在<strong>主内存</strong>中的，但是每个线程在访问变量的时候也都会在自己的<strong>工作内存</strong>（<strong>处理器高速缓存</strong>）中保留一份共享变量的副本。</p>
+<h1 id="Java内存模型（Java-Memory-Model，简称JMM）"><a href="#Java内存模型（Java-Memory-Model，简称JMM）" class="headerlink" title="Java内存模型（Java Memory Model，简称JMM）"></a>Java内存模型（Java Memory Model，简称JMM）</h1><p>线程对变量的所有操作（读，写）都必须在工作内存中进行，不能直接操作主内存中的数据。不同线程之间 也不能直接访问对方工作内存中的变量，线程间的变量值传递必须通过主内存进行中转传递。在JMM中工作内存和主内存的关系如下图：<img src="https://tcs.teambition.net/storage/312375a3cc8f7a30abe4a28da0e641ca6e87?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM3NWEzY2M4ZjdhMzBhYmU0YTI4ZGEwZTY0MWNhNmU4NyJ9.oAl0IadzNbAwYxpnCZMMS4lXPIKe0ZeU0sbZC0jui_0" alt="img"></p>
+<h1 id="Volatile可见性"><a href="#Volatile可见性" class="headerlink" title="Volatile可见性"></a>Volatile可见性</h1><p>继续我们上面的缓存一致性的问题，这个问题，在Java内存模型中，就是可见性的问题，即一个线程修改了共享变量的值，对另一个线程来说是不是立即可见的。如果不是立即可见的，那么就会出现缓存一致性的问题，如果是立即可见的，那么另一个线程在进行操作的时候，拿到的变量值就是最新的。就可以解决可见性的问题。</p>
+<h1 id="如何解决可见性问题"><a href="#如何解决可见性问题" class="headerlink" title="如何解决可见性问题"></a>如何解决可见性问题</h1><h2 id="方案一：加锁"><a href="#方案一：加锁" class="headerlink" title="方案一：加锁"></a>方案一：加锁</h2><p>将共享变量加锁，无论是synchronized还是Lock都可以，加锁达到的目的是在同一时间内只能有一个线程能对共享变量进行操作，就是说，共享变量从读取到工作内存到更新值后，同步回主内存的过程中，其他线程是操作不了这个变量的。这样自然就解决了可见性的问题了，但是这样的效率比较低，操作不了共享变量的线程就只能阻塞。</p>
+<h2 id="方案二：使用Voaltile修饰共享变量"><a href="#方案二：使用Voaltile修饰共享变量" class="headerlink" title="方案二：使用Voaltile修饰共享变量"></a>方案二：使用Voaltile修饰共享变量</h2><p>当一个共享变量被volatile修饰后，会保证每个线程将变量修改后的值立即同步回主内存中，当其他线程有需要读取变量时会读取到最新的变量值。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">被volatile修饰的变量，在被线程操作时，会有这样的机制</span><br></pre></td></tr></table></figure>
+
+<p>就是线程对变量操作时会从主内存中读取到自己的工作内存中，当线程对变量进行了修改后，那么其他已经读取了此变量的线程中的变量副本就会失效，这样其他线程在使用变量的时候，发现已经失效，那么就会去主内存中重新获取，这样获取到的就只最新的值了。</p>
+<h3 id="volatile具体如何实现"><a href="#volatile具体如何实现" class="headerlink" title="volatile具体如何实现"></a>volatile具体如何实现</h3><p>因为一台计算机有多台CPU，同一个变量，在多个CPU中缓存的值有可能不一样，那么以谁缓存的值为准呢？</p>
+<p>既然大家都有自己的值，那么各个CPU间就产生了一种协议，来保证按照一定的规律为准，来确定共享变量的准确值，这样各个CPU在读写共享变量时都按照协议来操作。</p>
+<p>这就是缓存一致性协议。</p>
+<p>最著名的缓存一致性协议就是Intel的MESI了，说MESI时，先解释一下，缓存行：</p>
+<blockquote>
+<p>缓存行（cache line）：CPU高速缓存的中可以分配的最小存储单位，高速缓存中的变量都是存在缓存行中的。</p>
+</blockquote>
+<p><strong>MESI的核心思想就是，当CPU对变量进行写操作时发现，变量是共享变量，那么就会通知其他CPU中将该变量的缓存行设置为无效状态。当其他CPU在操作变量时发现此变量在的缓存行已经无效，那么就会去主内存中重新读取最新的变量。</strong></p>
+<ul>
+<li><strong>那么其他CPU是如何发现变量被修改了的呢？</strong></li>
+</ul>
+<p>因为CPU和其他部件的进行通信是通过总线来进行的，所以每个CPU通过嗅探总线上的传播数据，来检查自己缓存的值是不是过期了，当处理器发现自己换成行对应的内存地址被修改后，就会将自己工作内存中的缓存行设置成无效状态，当CPU对此变量进行修改时会重新从系统主内存中读取变量。</p>
+<p><img src="https://tcs.teambition.net/storage/31239bb8c904d50a5b5d0c8667124423014e?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM5YmI4YzkwNGQ1MGE1YjVkMGM4NjY3MTI0NDIzMDE0ZSJ9.JT0aUDnk_3LNbi2Mh3i5gCHqceGWqlfqDDnIFLjM1Yc" alt="img"></p>
+<h2 id="Volatile的有序性（禁止指令重排序）"><a href="#Volatile的有序性（禁止指令重排序）" class="headerlink" title="Volatile的有序性（禁止指令重排序）"></a>Volatile的有序性（禁止指令重排序）</h2><p>一般来说，我们写程序的时候，都是要把先代码从上往下写，默认的认为程序是自顶向下顺序执行的，但是CPU为了提高效率，在保证最终结果准确的情况下，是会对指令进行重新排序的。就是说写在前的代码不一定先执行，在后面的也不一定晚执行。</p>
+<p>举个例子：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> a = <span class="number">5</span>; <span class="comment">// 代码1</span></span><br><span class="line"><span class="keyword">int</span> b = <span class="number">8</span>; <span class="comment">// 代码2</span></span><br><span class="line">a = a + <span class="number">4</span>;	<span class="comment">// 代码3</span></span><br><span class="line"><span class="keyword">int</span> c = a + b;	<span class="comment">// 代码4</span></span><br></pre></td></tr></table></figure>
+
+<p>上面四行代码的执行顺序有可能是</p>
+<p><img src="https://tcs.teambition.net/storage/3123f5ae619cf8291596ac325cd1e6b4f9c5?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNmNWFlNjE5Y2Y4MjkxNTk2YWMzMjVjZDFlNmI0ZjljNSJ9.p6R_JBUFRFUQp8B4fJySDu5PLLOrXGCQLNzwOduFn5g" alt="img"></p>
+<p>JMM在是允许指令重排序的，在保证最后结果正确的情况下，处理器可以尽情地发挥，提高执行效率。</p>
+<p>当多个线程执行代码的时候重排序的情况就更为突出了，各个CPU为了提高自己的效率，有可能会产生竞争情况，这样就有可能导致最终执行的正确性。</p>
+<p>所以为了保证在多个线程下最终执行的正确性，将变量用volatile进行修饰，这样就会达到禁止指令重排序的效果（其实也可以通过加锁，还有一些其他已知规则来实现禁止指令重排序，但是我们这里只讨论volatile的实现方式）。</p>
+<h3 id="volatile如何实现指令重排序"><a href="#volatile如何实现指令重排序" class="headerlink" title="volatile如何实现指令重排序"></a>volatile如何实现指令重排序</h3><p>答案是：<strong>内存屏障</strong></p>
+<p><strong>内存屏障</strong>是一组CPU指令，用于实现对内存操作的顺序限制。Java编译器，会在生成指令系列时，在适当的位置会插入内存屏障来禁止处理器对指令的重新排序。</p>
+<p>volatile会在变量写操作的前后加入两个内存屏障，来保证前面的写指令和后面的读指令是有序的。</p>
+<p><img src="https://tcs.teambition.net/storage/31231da51999ef7656daac49d517673bfc93?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjMxZGE1MTk5OWVmNzY1NmRhYWM0OWQ1MTc2NzNiZmM5MyJ9.fIwp50xili2EKHnJF9pUgU7hipgkCZTgjQwyJmdST3M" alt="img"></p>
+<p>volatile在变量的读操作后面插入两个指令，禁止后面的读指令和写指令重排序。</p>
+<p><img src="https://tcs.teambition.net/storage/3123c3ac08c811b3b0b1a891612ae1a819f0?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNjM2FjMDhjODExYjNiMGIxYTg5MTYxMmFlMWE4MTlmMCJ9.MJD52pSnTyKeqieAeHPqxBUINqo1Rnk3wDKTApNCcMk" alt="img"></p>
+<p>有序性，不仅只有volatile能保证，其他的实现方式也能保证，但是如果每一种实现方式都要了解那对于开发人员来说就比较困难了。</p>
+<p><strong>所以从JDK5就出现了happen-before原则，也叫先行发生原则。</strong>先行发生原则总结起来就是：<strong>如果一个操作A的产生的影响能被另一个操作B观察到，那么可以说，这个操作A先行发生与操作B。</strong></p>
+<p>这里所说的影响包括内存中的变量的修改，调用了方法，发送量消息等。</p>
+<p><strong>volatile中的先行发生原则是，对一个<strong><strong>volatile</strong></strong>变量的写操作，先行发生于后面任何地方对这个变量的读操作。</strong></p>
+<h1 id="Volatile无法保证原子性"><a href="#Volatile无法保证原子性" class="headerlink" title="Volatile无法保证原子性"></a><strong>Volatile无法保证原子性</strong></h1><p>原子性，是指一个操作过程要么都成功，要么都失败，是一个独立的完整的。</p>
+<p>就像上面说的，如果多个线程对一个变量进行累加，那么肯定得不到想要的结果，因为累加就不是一个原子操作。</p>
+<p>要保证累加最终结果正确，要么对累加变量加锁，要么就用AotomicInteger这样的变量。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 双重检查加锁式单例</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DoubleCheckLockSingleton</span> <span class="keyword">implements</span> <span class="title">Serializable</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 静态变量，用来存放实例。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">static</span> DoubleCheckLockSingleton doubleCheckLockSingleton = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 私有化构造方法，禁止外部创建实例。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">DoubleCheckLockSingleton</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 双重检查加锁的方式保证线程安全又能获得到唯一实例</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> DoubleCheckLockSingleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="comment">//第一次检查实例是否已经存在，不存在则进入代码块</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">null</span> == doubleCheckLockSingleton)&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (DoubleCheckLockSingleton.class)&#123;</span><br><span class="line">                <span class="comment">//第二次检查</span></span><br><span class="line">                <span class="keyword">if</span>(<span class="keyword">null</span>==doubleCheckLockSingleton)&#123;</span><br><span class="line">                    doubleCheckLockSingleton = <span class="keyword">new</span> DoubleCheckLockSingleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> doubleCheckLockSingleton;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为什么要进行双重检查呢？当第一个线程走到第一次检查时发现对象为空，然后进入锁，第二次就检查时也为空，那么就去创建对象，但是这个时候又来了一个线程来到了第一次检查，发现为空，但是这个时候因为锁被占用，所以就只能阻塞等待，然后第一个线程创建对象成功了，由于对象是被volatile修饰的能够立即反馈到其他线程上，所以在第一个线程释放锁之后，第二个线程进入了锁，然后进行第二次检查时，发现对象已经被创建了，那么就不在创建对象了。从而保证的单例。</p>
+<p>还有就是如果创建对象，步骤：</p>
+<ol>
+<li>分配内存空间。</li>
+<li>调用构造器，实例化。</li>
+<li>返回内存地址给引用。</li>
+</ol>
+<p>如果这三个指令顺序被重排了，那么当多线程来获取对象的时候就会造成对象虽然实例化了，但是没有分配内存空间，会有空指针的风险。所以加上了volatile的对象，也保证了在第二次检查时不会被已经在创建过程中的对象有被检测为空的风险。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>volatile可以看做轻量级的synchronized，虽然volatile无法保证原子性，但是如果在多线程下的操作本身就是原子性操作（例如赋值操作），那么使用volatile会优于synchronized。</p>
+<p>volatile可以适用于某个标志的flag，一旦被修改就需要被其他线程立即可见，可以修饰为触发器的变量，一旦变量被修改就触发某种操作。</p>
+<p>volatile变量的写操作由于happen-before原则，一定会发生在读之前。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>vloatile</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>sychronized关键字</title>
     <url>/blog/2021/03/23/sychronized/</url>
     <content><![CDATA[<h1 id="Synchronized作用"><a href="#Synchronized作用" class="headerlink" title="Synchronized作用"></a>Synchronized作用</h1><ul>
-<li>原子性：synchronized保证语句块内操作是原子的</li>
-<li>可见性：synchronized保证可见性（通过“在执行unlock之前，必须先把此变量同步回主内存”实现）</li>
-<li>有序性：synchronized保证有序性（通过“一个变量在同一时刻只允许一条线程对其进行lock操作”）</li>
+<li><p>原子性：synchronized保证语句块内操作是原子的</p>
+</li>
+<li><p>可见性：synchronized保证可见性（通过“在执行unlock之前，必须先把此变量同步回主内存”实现）</p>
+</li>
+<li><p>有序性：synchronized保证有序性（通过“一个变量在同一时刻只允许一条线程对其进行lock操作”）</p>
+<span id="more"></span></li>
 </ul>
 <h1 id="Synchronized使用场景"><a href="#Synchronized使用场景" class="headerlink" title="Synchronized使用场景"></a>Synchronized使用场景</h1><p>Synchronized可以使用在方法上与代码块上，两者之间的区别为：</p>
 <h2 id="方法上"><a href="#方法上" class="headerlink" title="方法上"></a><strong>方法上</strong></h2><p>使用在静态方法上时，Synchronized锁住的是类对象。</p>
@@ -157,6 +239,8 @@
 <p><img src="https://pic1.zhimg.com/50/v2-d5b7da5ee39eef8754554efb392e7668_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic1.zhimg.com/80/v2-d5b7da5ee39eef8754554efb392e7668_720w.jpg?source=1940ef5c" alt="img"></p>
 <p>而且序列化机制从某种意义上来说也弥补了平台化的一些差异，毕竟转换后的字节流可以在其他平台上进行反序列化来恢复对象。</p>
 <p>事情就是那么个事情，看起来很简单，不过后面的东西还不少，请往下看。</p>
+<span id="more"></span>
+
 <hr>
 <h2 id="对象如何序列化？"><a href="#对象如何序列化？" class="headerlink" title="对象如何序列化？"></a><strong>对象如何序列化？</strong></h2><p>然而Java目前并没有一个关键字可以直接去定义一个所谓的“可持久化”对象。</p>
 <p>对象的持久化和反持久化需要靠程序员在代码里手动<strong>显式地</strong>进行序列化和反序列化还原的动作。</p>
@@ -263,84 +347,11 @@
       </tags>
   </entry>
   <entry>
-    <title>volatile关键字</title>
-    <url>/blog/2021/03/23/volatile/</url>
-    <content><![CDATA[<h1 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h1><p>在面试中，对于多线程经常会用到volatile关键字，关于volatile，大多人只知道它可以<strong>保持可见性、禁止指令重排序</strong>，但再往深问，具体是如何实现的，在什么场景下使用，为什么不直接使用synchronized关键字。</p>
-<h1 id="系统处理效率与Java内存模型"><a href="#系统处理效率与Java内存模型" class="headerlink" title="系统处理效率与Java内存模型"></a>系统处理效率与Java内存模型</h1><p>在计算机中，每条程序指令都是在CPU中执行的，而CPU执行指令的数据都是临时存储在内存中的，但是CPU的读取速度远超内存的读取速度，如果所有的CPU指令都从内存读取会大大降低效率，<strong>所有现代计算机系统都不得不加入一层或多层读写速度尽可能接近处理器的高速缓存（Cache）来作为处理器与内存中间的缓冲。</strong></p>
-<p>将运算需要使用的数据复制到缓存中，让运算能快速进行，当运算结束后，再从缓存同步到内存中，这样处理器就无需等待缓慢的内存读写了。</p>
-<p>虽然增加了高速缓冲提升了处理器的处理效率，但也带来了新的问题：</p>
-<p>现代计算机都是多核CPU，一开始，内存中的变量A的值是1，第一个CPU读取了数据，第二个CPU也将数据读取到了自己的高速缓存当中，当第一个CPU对变量A进行加1操作时，变量A的值变成了2，然后将将变量A的值写回内存中，这时第二个CPU也对变量A进行加1操作时，由于第二个CPU中高速缓存中的值还是1，所以加1操作后的结果为2，然后第二个CPU又将变量A的值同步回内存中，这样就导致执行了两次加1操作后，变量A的值最终是2，而不是3。<strong>这种被多个CPU访问的变量，通常称为共享变量。</strong>而产生的上面的问题，就是引入了高速缓存后的，主内存和缓存内容不一致的问题。因为每个处理器有自己的高速缓存，但是它们又共享同一块主内存，所以必然会出现主内存不知该以哪个高速缓存中的变量为准的情况。</p>
-<p><img src="https://tcs.teambition.net/storage/3123a66b1b8f83d6bf3b1fd3b27235a1425e?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNhNjZiMWI4ZjgzZDZiZjNiMWZkM2IyNzIzNWExNDI1ZSJ9.a1RIrZ4CNkdkqFYvKgkkTYLhbqq7HGao9YpIoCfTMzQ" alt="img"></p>
-<p>上面这个缓存不一致的问题，我们先记下来，继续来看Java内存模型，其实Java内存模型描述的上面讲的计算机系统高速缓存和内存之间的关系类似。</p>
-<p>Java内存模型描述了，<strong>各种变量的访问规则，以及将变量存储到内存和从内存读取变量的这种底层细节。</strong></p>
-<p>在Java内存模型中关注的变量都是共享变量（实例变量、类变量）。所有的共享变量都是存储在<strong>主内存</strong>中的，但是每个线程在访问变量的时候也都会在自己的<strong>工作内存</strong>（<strong>处理器高速缓存</strong>）中保留一份共享变量的副本。</p>
-<h1 id="Java内存模型（Java-Memory-Model，简称JMM）"><a href="#Java内存模型（Java-Memory-Model，简称JMM）" class="headerlink" title="Java内存模型（Java Memory Model，简称JMM）"></a>Java内存模型（Java Memory Model，简称JMM）</h1><p>线程对变量的所有操作（读，写）都必须在工作内存中进行，不能直接操作主内存中的数据。不同线程之间 也不能直接访问对方工作内存中的变量，线程间的变量值传递必须通过主内存进行中转传递。在JMM中工作内存和主内存的关系如下图：<img src="https://tcs.teambition.net/storage/312375a3cc8f7a30abe4a28da0e641ca6e87?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM3NWEzY2M4ZjdhMzBhYmU0YTI4ZGEwZTY0MWNhNmU4NyJ9.oAl0IadzNbAwYxpnCZMMS4lXPIKe0ZeU0sbZC0jui_0" alt="img"></p>
-<h1 id="Volatile可见性"><a href="#Volatile可见性" class="headerlink" title="Volatile可见性"></a>Volatile可见性</h1><p>继续我们上面的缓存一致性的问题，这个问题，在Java内存模型中，就是可见性的问题，即一个线程修改了共享变量的值，对另一个线程来说是不是立即可见的。如果不是立即可见的，那么就会出现缓存一致性的问题，如果是立即可见的，那么另一个线程在进行操作的时候，拿到的变量值就是最新的。就可以解决可见性的问题。</p>
-<h1 id="如何解决可见性问题"><a href="#如何解决可见性问题" class="headerlink" title="如何解决可见性问题"></a>如何解决可见性问题</h1><h2 id="方案一：加锁"><a href="#方案一：加锁" class="headerlink" title="方案一：加锁"></a>方案一：加锁</h2><p>将共享变量加锁，无论是synchronized还是Lock都可以，加锁达到的目的是在同一时间内只能有一个线程能对共享变量进行操作，就是说，共享变量从读取到工作内存到更新值后，同步回主内存的过程中，其他线程是操作不了这个变量的。这样自然就解决了可见性的问题了，但是这样的效率比较低，操作不了共享变量的线程就只能阻塞。</p>
-<h2 id="方案二：使用Voaltile修饰共享变量"><a href="#方案二：使用Voaltile修饰共享变量" class="headerlink" title="方案二：使用Voaltile修饰共享变量"></a>方案二：使用Voaltile修饰共享变量</h2><p>当一个共享变量被volatile修饰后，会保证每个线程将变量修改后的值立即同步回主内存中，当其他线程有需要读取变量时会读取到最新的变量值。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">被volatile修饰的变量，在被线程操作时，会有这样的机制</span><br></pre></td></tr></table></figure>
-
-<p>就是线程对变量操作时会从主内存中读取到自己的工作内存中，当线程对变量进行了修改后，那么其他已经读取了此变量的线程中的变量副本就会失效，这样其他线程在使用变量的时候，发现已经失效，那么就会去主内存中重新获取，这样获取到的就只最新的值了。</p>
-<h3 id="volatile具体如何实现"><a href="#volatile具体如何实现" class="headerlink" title="volatile具体如何实现"></a>volatile具体如何实现</h3><p>因为一台计算机有多台CPU，同一个变量，在多个CPU中缓存的值有可能不一样，那么以谁缓存的值为准呢？</p>
-<p>既然大家都有自己的值，那么各个CPU间就产生了一种协议，来保证按照一定的规律为准，来确定共享变量的准确值，这样各个CPU在读写共享变量时都按照协议来操作。</p>
-<p>这就是缓存一致性协议。</p>
-<p>最著名的缓存一致性协议就是Intel的MESI了，说MESI时，先解释一下，缓存行：</p>
-<blockquote>
-<p>缓存行（cache line）：CPU高速缓存的中可以分配的最小存储单位，高速缓存中的变量都是存在缓存行中的。</p>
-</blockquote>
-<p><strong>MESI的核心思想就是，当CPU对变量进行写操作时发现，变量是共享变量，那么就会通知其他CPU中将该变量的缓存行设置为无效状态。当其他CPU在操作变量时发现此变量在的缓存行已经无效，那么就会去主内存中重新读取最新的变量。</strong></p>
-<ul>
-<li><strong>那么其他CPU是如何发现变量被修改了的呢？</strong></li>
-</ul>
-<p>因为CPU和其他部件的进行通信是通过总线来进行的，所以每个CPU通过嗅探总线上的传播数据，来检查自己缓存的值是不是过期了，当处理器发现自己换成行对应的内存地址被修改后，就会将自己工作内存中的缓存行设置成无效状态，当CPU对此变量进行修改时会重新从系统主内存中读取变量。</p>
-<p><img src="https://tcs.teambition.net/storage/31239bb8c904d50a5b5d0c8667124423014e?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM5YmI4YzkwNGQ1MGE1YjVkMGM4NjY3MTI0NDIzMDE0ZSJ9.JT0aUDnk_3LNbi2Mh3i5gCHqceGWqlfqDDnIFLjM1Yc" alt="img"></p>
-<h2 id="Volatile的有序性（禁止指令重排序）"><a href="#Volatile的有序性（禁止指令重排序）" class="headerlink" title="Volatile的有序性（禁止指令重排序）"></a>Volatile的有序性（禁止指令重排序）</h2><p>一般来说，我们写程序的时候，都是要把先代码从上往下写，默认的认为程序是自顶向下顺序执行的，但是CPU为了提高效率，在保证最终结果准确的情况下，是会对指令进行重新排序的。就是说写在前的代码不一定先执行，在后面的也不一定晚执行。</p>
-<p>举个例子：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> a = <span class="number">5</span>; <span class="comment">// 代码1</span></span><br><span class="line"><span class="keyword">int</span> b = <span class="number">8</span>; <span class="comment">// 代码2</span></span><br><span class="line">a = a + <span class="number">4</span>;	<span class="comment">// 代码3</span></span><br><span class="line"><span class="keyword">int</span> c = a + b;	<span class="comment">// 代码4</span></span><br></pre></td></tr></table></figure>
-
-<p>上面四行代码的执行顺序有可能是</p>
-<p><img src="https://tcs.teambition.net/storage/3123f5ae619cf8291596ac325cd1e6b4f9c5?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNmNWFlNjE5Y2Y4MjkxNTk2YWMzMjVjZDFlNmI0ZjljNSJ9.p6R_JBUFRFUQp8B4fJySDu5PLLOrXGCQLNzwOduFn5g" alt="img"></p>
-<p>JMM在是允许指令重排序的，在保证最后结果正确的情况下，处理器可以尽情地发挥，提高执行效率。</p>
-<p>当多个线程执行代码的时候重排序的情况就更为突出了，各个CPU为了提高自己的效率，有可能会产生竞争情况，这样就有可能导致最终执行的正确性。</p>
-<p>所以为了保证在多个线程下最终执行的正确性，将变量用volatile进行修饰，这样就会达到禁止指令重排序的效果（其实也可以通过加锁，还有一些其他已知规则来实现禁止指令重排序，但是我们这里只讨论volatile的实现方式）。</p>
-<h3 id="volatile如何实现指令重排序"><a href="#volatile如何实现指令重排序" class="headerlink" title="volatile如何实现指令重排序"></a>volatile如何实现指令重排序</h3><p>答案是：<strong>内存屏障</strong></p>
-<p><strong>内存屏障</strong>是一组CPU指令，用于实现对内存操作的顺序限制。Java编译器，会在生成指令系列时，在适当的位置会插入内存屏障来禁止处理器对指令的重新排序。</p>
-<p>volatile会在变量写操作的前后加入两个内存屏障，来保证前面的写指令和后面的读指令是有序的。</p>
-<p><img src="https://tcs.teambition.net/storage/31231da51999ef7656daac49d517673bfc93?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjMxZGE1MTk5OWVmNzY1NmRhYWM0OWQ1MTc2NzNiZmM5MyJ9.fIwp50xili2EKHnJF9pUgU7hipgkCZTgjQwyJmdST3M" alt="img"></p>
-<p>volatile在变量的读操作后面插入两个指令，禁止后面的读指令和写指令重排序。</p>
-<p><img src="https://tcs.teambition.net/storage/3123c3ac08c811b3b0b1a891612ae1a819f0?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNjM2FjMDhjODExYjNiMGIxYTg5MTYxMmFlMWE4MTlmMCJ9.MJD52pSnTyKeqieAeHPqxBUINqo1Rnk3wDKTApNCcMk" alt="img"></p>
-<p>有序性，不仅只有volatile能保证，其他的实现方式也能保证，但是如果每一种实现方式都要了解那对于开发人员来说就比较困难了。</p>
-<p><strong>所以从JDK5就出现了happen-before原则，也叫先行发生原则。</strong>先行发生原则总结起来就是：<strong>如果一个操作A的产生的影响能被另一个操作B观察到，那么可以说，这个操作A先行发生与操作B。</strong></p>
-<p>这里所说的影响包括内存中的变量的修改，调用了方法，发送量消息等。</p>
-<p><strong>volatile中的先行发生原则是，对一个<strong><strong>volatile</strong></strong>变量的写操作，先行发生于后面任何地方对这个变量的读操作。</strong></p>
-<h1 id="Volatile无法保证原子性"><a href="#Volatile无法保证原子性" class="headerlink" title="Volatile无法保证原子性"></a><strong>Volatile无法保证原子性</strong></h1><p>原子性，是指一个操作过程要么都成功，要么都失败，是一个独立的完整的。</p>
-<p>就像上面说的，如果多个线程对一个变量进行累加，那么肯定得不到想要的结果，因为累加就不是一个原子操作。</p>
-<p>要保证累加最终结果正确，要么对累加变量加锁，要么就用AotomicInteger这样的变量。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 双重检查加锁式单例</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DoubleCheckLockSingleton</span> <span class="keyword">implements</span> <span class="title">Serializable</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 静态变量，用来存放实例。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">static</span> DoubleCheckLockSingleton doubleCheckLockSingleton = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 私有化构造方法，禁止外部创建实例。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">DoubleCheckLockSingleton</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 双重检查加锁的方式保证线程安全又能获得到唯一实例</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> DoubleCheckLockSingleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="comment">//第一次检查实例是否已经存在，不存在则进入代码块</span></span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">null</span> == doubleCheckLockSingleton)&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (DoubleCheckLockSingleton.class)&#123;</span><br><span class="line">                <span class="comment">//第二次检查</span></span><br><span class="line">                <span class="keyword">if</span>(<span class="keyword">null</span>==doubleCheckLockSingleton)&#123;</span><br><span class="line">                    doubleCheckLockSingleton = <span class="keyword">new</span> DoubleCheckLockSingleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> doubleCheckLockSingleton;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>为什么要进行双重检查呢？当第一个线程走到第一次检查时发现对象为空，然后进入锁，第二次就检查时也为空，那么就去创建对象，但是这个时候又来了一个线程来到了第一次检查，发现为空，但是这个时候因为锁被占用，所以就只能阻塞等待，然后第一个线程创建对象成功了，由于对象是被volatile修饰的能够立即反馈到其他线程上，所以在第一个线程释放锁之后，第二个线程进入了锁，然后进行第二次检查时，发现对象已经被创建了，那么就不在创建对象了。从而保证的单例。</p>
-<p>还有就是如果创建对象，步骤：</p>
-<ol>
-<li>分配内存空间。</li>
-<li>调用构造器，实例化。</li>
-<li>返回内存地址给引用。</li>
-</ol>
-<p>如果这三个指令顺序被重排了，那么当多线程来获取对象的时候就会造成对象虽然实例化了，但是没有分配内存空间，会有空指针的风险。所以加上了volatile的对象，也保证了在第二次检查时不会被已经在创建过程中的对象有被检测为空的风险。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>volatile可以看做轻量级的synchronized，虽然volatile无法保证原子性，但是如果在多线程下的操作本身就是原子性操作（例如赋值操作），那么使用volatile会优于synchronized。</p>
-<p>volatile可以适用于某个标志的flag，一旦被修改就需要被其他线程立即可见，可以修饰为触发器的变量，一旦变量被修改就触发某种操作。</p>
-<p>volatile变量的写操作由于happen-before原则，一定会发生在读之前。</p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>vloatile</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>AQS详解</title>
     <url>/blog/2021/03/21/AbstractQueuedSynchronizer/</url>
     <content><![CDATA[<h1 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h1><p>AQS是AbstractQueuedSychronizer类的简称，虽然我们不会直接使用这个类，但是这个类是Java很多并发工具的实现。</p>
+<span id="more"></span>
+
 <h1 id="实现AQS的类"><a href="#实现AQS的类" class="headerlink" title="实现AQS的类"></a>实现AQS的类</h1><p>使用IDEA可以看到，以下类是使用AQS实现的：</p>
 <p><img src="https://p3-open.byteimg.com/img/pgc-image/d16a2a71abe644a0b7faec84c6f91565~640x0.jpeg" alt="面试必问的AQS（AbstractQueuedSynchronizer），一次性全搞定"></p>
 <p>可以看到，ConutDownLatch，Semaphore，ReentrantLock等常见的工具类都是由AQS来实现的。</p>

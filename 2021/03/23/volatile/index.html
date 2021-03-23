@@ -17,15 +17,15 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"dream-break.gitee.io","root":"/blog/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"dream-break.gitee.io","root":"/blog/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"b2t":true,"position":"left","scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="Java volatile关键字详解">
+  <meta name="description" content="序言在面试中，对于多线程经常会用到volatile关键字，关于volatile，大多人只知道它可以保持可见性、禁止指令重排序，但再往深问，具体是如何实现的，在什么场景下使用，为什么不直接使用synchronized关键字。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="volatile关键字">
 <meta property="og:url" content="http://dream-break.gitee.io/2021/03/23/volatile/index.html">
-<meta property="og:site_name" content="Q的博客">
-<meta property="og:description" content="Java volatile关键字详解">
+<meta property="og:site_name" content="o(&gt;ω&lt;)o">
+<meta property="og:description" content="序言在面试中，对于多线程经常会用到volatile关键字，关于volatile，大多人只知道它可以保持可见性、禁止指令重排序，但再往深问，具体是如何实现的，在什么场景下使用，为什么不直接使用synchronized关键字。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://tcs.teambition.net/storage/3123a66b1b8f83d6bf3b1fd3b27235a1425e?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNhNjZiMWI4ZjgzZDZiZjNiMWZkM2IyNzIzNWExNDI1ZSJ9.a1RIrZ4CNkdkqFYvKgkkTYLhbqq7HGao9YpIoCfTMzQ">
 <meta property="og:image" content="https://tcs.teambition.net/storage/312375a3cc8f7a30abe4a28da0e641ca6e87?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM3NWEzY2M4ZjdhMzBhYmU0YTI4ZGEwZTY0MWNhNmU4NyJ9.oAl0IadzNbAwYxpnCZMMS4lXPIKe0ZeU0sbZC0jui_0">
@@ -34,8 +34,8 @@
 <meta property="og:image" content="https://tcs.teambition.net/storage/31231da51999ef7656daac49d517673bfc93?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjMxZGE1MTk5OWVmNzY1NmRhYWM0OWQ1MTc2NzNiZmM5MyJ9.fIwp50xili2EKHnJF9pUgU7hipgkCZTgjQwyJmdST3M">
 <meta property="og:image" content="https://tcs.teambition.net/storage/3123c3ac08c811b3b0b1a891612ae1a819f0?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNjM2FjMDhjODExYjNiMGIxYTg5MTYxMmFlMWE4MTlmMCJ9.MJD52pSnTyKeqieAeHPqxBUINqo1Rnk3wDKTApNCcMk">
 <meta property="article:published_time" content="2021-03-23T03:31:14.000Z">
-<meta property="article:modified_time" content="2021-03-23T03:34:31.599Z">
-<meta property="article:author" content="Q">
+<meta property="article:modified_time" content="2021-03-23T06:04:26.671Z">
+<meta property="article:author" content="Qの博客">
 <meta property="article:tag" content="vloatile">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://tcs.teambition.net/storage/3123a66b1b8f83d6bf3b1fd3b27235a1425e?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzA3NTA4NywiaWF0IjoxNjE2NDcwMjg3LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjNhNjZiMWI4ZjgzZDZiZjNiMWZkM2IyNzIzNWExNDI1ZSJ9.a1RIrZ4CNkdkqFYvKgkkTYLhbqq7HGao9YpIoCfTMzQ">
@@ -53,7 +53,7 @@
   };
 </script>
 
-  <title>volatile关键字 | Q的博客</title>
+  <title>volatile关键字 | o(>ω<)o</title>
   
 
 
@@ -104,9 +104,10 @@
 
     <a href="/blog/" class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">Q的博客</h1>
+      <h1 class="site-title">o(>ω<)o</h1>
       <span class="logo-line-after"><i></i></span>
     </a>
+      <p class="site-subtitle" itemprop="description">一位普通的java程序员(￣▽￣)ノ</p>
   </div>
 
   <div class="site-nav-right">
@@ -178,10 +179,6 @@
     </header>
 
     
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
 
 
     <main class="main">
@@ -200,12 +197,12 @@
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
-      <meta itemprop="name" content="Q">
-      <meta itemprop="description" content="">
+      <meta itemprop="name" content="Qの博客">
+      <meta itemprop="description" content="一位普通的java程序员(￣▽￣)ノ">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Q的博客">
+      <meta itemprop="name" content="o(>ω<)o">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -220,7 +217,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-03-23 11:31:14 / 修改时间：11:34:31" itemprop="dateCreated datePublished" datetime="2021-03-23T11:31:14+08:00">2021-03-23</time>
+              <time title="创建时间：2021-03-23 11:31:14 / 修改时间：14:04:26" itemprop="dateCreated datePublished" datetime="2021-03-23T11:31:14+08:00">2021-03-23</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -232,8 +229,21 @@
                 </span>
             </span>
 
-          
-            <div class="post-description">Java volatile关键字详解</div>
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
 
         </div>
       </header>
@@ -245,6 +255,8 @@
 
       
         <h1 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h1><p>在面试中，对于多线程经常会用到volatile关键字，关于volatile，大多人只知道它可以<strong>保持可见性、禁止指令重排序</strong>，但再往深问，具体是如何实现的，在什么场景下使用，为什么不直接使用synchronized关键字。</p>
+<span id="more"></span>
+
 <h1 id="系统处理效率与Java内存模型"><a href="#系统处理效率与Java内存模型" class="headerlink" title="系统处理效率与Java内存模型"></a>系统处理效率与Java内存模型</h1><p>在计算机中，每条程序指令都是在CPU中执行的，而CPU执行指令的数据都是临时存储在内存中的，但是CPU的读取速度远超内存的读取速度，如果所有的CPU指令都从内存读取会大大降低效率，<strong>所有现代计算机系统都不得不加入一层或多层读写速度尽可能接近处理器的高速缓存（Cache）来作为处理器与内存中间的缓冲。</strong></p>
 <p>将运算需要使用的数据复制到缓存中，让运算能快速进行，当运算结束后，再从缓存同步到内存中，这样处理器就无需等待缓慢的内存读写了。</p>
 <p>虽然增加了高速缓冲提升了处理器的处理效率，但也带来了新的问题：</p>
@@ -310,14 +322,22 @@
 <p>volatile变量的写操作由于happen-before原则，一定会发生在读之前。</p>
 
     </div>
-
+	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+	  
+	</div>
     
     
     
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/blog/tags/vloatile/" rel="tag"># vloatile</a>
+              <a href="/blog/tags/vloatile/" rel="tag"><i class="fa fa-tag"></i> vloatile</a>
           </div>
 
         
@@ -397,10 +417,10 @@
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="Q"
+    <img class="site-author-image" itemprop="image" alt="Qの博客"
       src="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
-  <p class="site-author-name" itemprop="name">Q</p>
-  <div class="site-description" itemprop="description"></div>
+  <p class="site-author-name" itemprop="name">Qの博客</p>
+  <div class="site-description" itemprop="description">一位普通的java程序员(￣▽￣)ノ</div>
 </div>
 <div class="site-state-wrap motion-element">
   <nav class="site-state">
@@ -429,6 +449,10 @@
 
 
       </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
 
     </div>
   </aside>
@@ -451,10 +475,19 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">Q</span>
+  <span class="author" itemprop="copyrightHolder">Qの博客</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">32k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">29 分钟</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
-  </div>
+
 
         
 
@@ -511,6 +544,6 @@
 
   
 
-</body>
+<script src="/blog/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":null,"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"display":null,"superSample":2,"width":200,"height":400,"position":"right","hOffset":0,"vOffset":-20,"mobile":null,"show":false,"react":null,"opacity":0.7,"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 </html>
 <script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
