@@ -20,30 +20,36 @@
     var CONFIG = {"hostname":"dream-break.gitee.io","root":"/blog/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"b2t":true,"position":"left","scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="一位普通的java程序员(￣▽￣)ノ">
-<meta property="og:type" content="website">
-<meta property="og:title" content="o(&gt;ω&lt;)o">
-<meta property="og:url" content="http://dream-break.gitee.io/index.html">
+  <meta name="description" content="乐观锁​    一般而言，在并发情况下我们必须通过一定的手段来保证数据的准确性，如果没有做好并发控制，就可能导致脏读、幻读和不可重复度等一系列问题。乐观锁是人们为了应付并发问题而提出的一种思想，具体的实现则有多种方式。 ​    乐观锁假设数据一般情况下不会造成冲突，只在数据进行提交更新时，才会正式对数据的冲突与否进行检测，如果发现冲突了，则返回给用户错误的信息，让用户决定如何去做。乐观锁适用于读">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CAS算法与Java原子类">
+<meta property="og:url" content="http://dream-break.gitee.io/2021/03/23/CAS/index.html">
 <meta property="og:site_name" content="o(&gt;ω&lt;)o">
-<meta property="og:description" content="一位普通的java程序员(￣▽￣)ノ">
+<meta property="og:description" content="乐观锁​    一般而言，在并发情况下我们必须通过一定的手段来保证数据的准确性，如果没有做好并发控制，就可能导致脏读、幻读和不可重复度等一系列问题。乐观锁是人们为了应付并发问题而提出的一种思想，具体的实现则有多种方式。 ​    乐观锁假设数据一般情况下不会造成冲突，只在数据进行提交更新时，才会正式对数据的冲突与否进行检测，如果发现冲突了，则返回给用户错误的信息，让用户决定如何去做。乐观锁适用于读">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img2020.cnblogs.com/blog/1759254/202010/1759254-20201023160912203-1236895465.png">
+<meta property="og:image" content="https://img2020.cnblogs.com/blog/1759254/202010/1759254-20201023160928958-395433581.png">
+<meta property="article:published_time" content="2021-03-23T07:50:00.000Z">
+<meta property="article:modified_time" content="2021-03-23T07:56:01.998Z">
 <meta property="article:author" content="Qの博客">
+<meta property="article:tag" content="多线程">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img2020.cnblogs.com/blog/1759254/202010/1759254-20201023160912203-1236895465.png">
 
-<link rel="canonical" href="http://dream-break.gitee.io/">
+<link rel="canonical" href="http://dream-break.gitee.io/2021/03/23/CAS/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>o(>ω<)o</title>
+  <title>CAS算法与Java原子类 | o(>ω<)o</title>
   
 
 
@@ -176,9 +182,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
+
+    
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -194,10 +201,9 @@
       <meta itemprop="name" content="o(>ω<)o">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blog/2021/03/23/CAS/" class="post-title-link" itemprop="url">CAS算法与Java原子类</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          CAS算法与Java原子类
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -244,7 +250,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="乐观锁"><a href="#乐观锁" class="headerlink" title="乐观锁"></a>乐观锁</h1><p>​    一般而言，在并发情况下我们必须通过一定的手段来保证数据的准确性，如果没有做好并发控制，就可能导致脏读、幻读和不可重复度等一系列问题。乐观锁是人们为了应付并发问题而提出的一种思想，具体的实现则有多种方式。</p>
+        <h1 id="乐观锁"><a href="#乐观锁" class="headerlink" title="乐观锁"></a>乐观锁</h1><p>​    一般而言，在并发情况下我们必须通过一定的手段来保证数据的准确性，如果没有做好并发控制，就可能导致脏读、幻读和不可重复度等一系列问题。乐观锁是人们为了应付并发问题而提出的一种思想，具体的实现则有多种方式。</p>
 <p>​    乐观锁假设数据一般情况下不会造成冲突，只在数据进行提交更新时，才会正式对数据的冲突与否进行检测，如果发现冲突了，则返回给用户错误的信息，让用户决定如何去做。乐观锁适用于读操作多的场景，可以提高程序的吞吐量。</p>
 <h1 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h1><p>​    CAS（Compare And Swap）比较并交换，是一种实现了乐观锁思想的并发控制技术。CAS 算法的过程是：它包含 3 个参数 CAS（V，E，N），V 表示要更新的变量（内存值），E 表示旧的预期值，N 表示即将更新的预期值。当且仅当 V 值等于 E 值时，才会将 V 的值设为 N，如果 V 值和 E 值不同，说明已经有其他线程做了更新，则当前线程什么也不做，并返回当前 V 的真实值。整个操作是原子性的。</p>
 <p>​    当多个线程同时使用 CAS 操作一个变量时，只有一个会胜出，并成功更新，其余均会失败。失败的线程不会被挂起，仅是被告知失败，并允许再次尝试，当然也可以放弃本次操作，所以 CAS 算法是非阻塞的。基于上述原理，CAS 操作可以在不借助锁的情况下实现合适的并发处理。</p>
@@ -328,509 +334,41 @@
 </li>
 </ul>
 
-      
     </div>
 	<div>
+	  
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
 	  
 	</div>
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
+          <div class="post-tags">
+              <a href="/blog/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag"><i class="fa fa-tag"></i> 多线程</a>
+          </div>
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://dream-break.gitee.io/2021/03/23/sychronized/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
-      <meta itemprop="name" content="Qの博客">
-      <meta itemprop="description" content="一位普通的java程序员(￣▽￣)ノ">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="o(>ω<)o">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blog/2021/03/23/sychronized/" class="post-title-link" itemprop="url">sychronized关键字</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-03-23 11:34:43 / 修改时间：15:51:05" itemprop="dateCreated datePublished" datetime="2021-03-23T11:34:43+08:00">2021-03-23</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>3.7k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Synchronized作用"><a href="#Synchronized作用" class="headerlink" title="Synchronized作用"></a>Synchronized作用</h1><ul>
-<li><p>原子性：synchronized保证语句块内操作是原子的</p>
-</li>
-<li><p>可见性：synchronized保证可见性（通过“在执行unlock之前，必须先把此变量同步回主内存”实现）</p>
-</li>
-<li><p>有序性：synchronized保证有序性（通过“一个变量在同一时刻只允许一条线程对其进行lock操作”）</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/blog/2021/03/23/sychronized/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
-	<div>
-	  
-	</div>
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://dream-break.gitee.io/2021/03/23/volatile/">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
-      <meta itemprop="name" content="Qの博客">
-      <meta itemprop="description" content="一位普通的java程序员(￣▽￣)ノ">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="o(>ω<)o">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blog/2021/03/23/volatile/" class="post-title-link" itemprop="url">volatile关键字</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-03-23 11:31:14 / 修改时间：15:51:04" itemprop="dateCreated datePublished" datetime="2021-03-23T11:31:14+08:00">2021-03-23</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>4.4k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h1><p>在面试中，对于多线程经常会用到volatile关键字，关于volatile，大多人只知道它可以<strong>保持可见性、禁止指令重排序</strong>，但再往深问，具体是如何实现的，在什么场景下使用，为什么不直接使用synchronized关键字。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/blog/2021/03/23/volatile/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/2021/03/23/sychronized/" rel="prev" title="sychronized关键字">
+      <i class="fa fa-chevron-left"></i> sychronized关键字
+    </a></div>
+      <div class="post-nav-item"></div>
     </div>
-	<div>
-	  
-	</div>
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
+    
   </article>
   
   
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://dream-break.gitee.io/2021/03/22/ArrayList/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
-      <meta itemprop="name" content="Qの博客">
-      <meta itemprop="description" content="一位普通的java程序员(￣▽￣)ノ">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="o(>ω<)o">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blog/2021/03/22/ArrayList/" class="post-title-link" itemprop="url">ArrayList解析</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-03-22 20:24:22" itemprop="dateCreated datePublished" datetime="2021-03-22T20:24:22+08:00">2021-03-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-03-23 14:03:55" itemprop="dateModified" datetime="2021-03-23T14:03:55+08:00">2021-03-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>3.5k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="ArrayList集合"><a href="#ArrayList集合" class="headerlink" title="ArrayList集合"></a>ArrayList集合</h1><h2 id="ArrayList类图"><a href="#ArrayList类图" class="headerlink" title="ArrayList类图"></a>ArrayList类图</h2><p><img src="https://tcs.teambition.net/storage/31239f334b168e4eebefcd7c3a1b6906b9be?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYxNzAyMDgzOSwiaWF0IjoxNjE2NDE2MDM5LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMjM5ZjMzNGIxNjhlNGVlYmVmY2Q3YzNhMWI2OTA2YjliZSJ9.uKhfZBuclOWsNPt_rj83943kz4ktgycaqlkRUagsLqE" alt="img"></p>
-<p>ArrayList的底层是由数组实现的，数组的特点是固定大小，而ArrayList实现了动态扩容。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/blog/2021/03/22/ArrayList/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-	<div>
-	  
-	</div>
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://dream-break.gitee.io/2021/03/21/AbstractQueuedSynchronizer/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
-      <meta itemprop="name" content="Qの博客">
-      <meta itemprop="description" content="一位普通的java程序员(￣▽￣)ノ">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="o(>ω<)o">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blog/2021/03/21/AbstractQueuedSynchronizer/" class="post-title-link" itemprop="url">AQS详解</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-03-21 17:04:48" itemprop="dateCreated datePublished" datetime="2021-03-21T17:04:48+08:00">2021-03-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-03-23 14:03:50" itemprop="dateModified" datetime="2021-03-23T14:03:50+08:00">2021-03-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>13k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>12 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="序言"><a href="#序言" class="headerlink" title="序言"></a>序言</h1><p>AQS是AbstractQueuedSychronizer类的简称，虽然我们不会直接使用这个类，但是这个类是Java很多并发工具的实现。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/blog/2021/03/21/AbstractQueuedSynchronizer/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-	<div>
-	  
-	</div>
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://dream-break.gitee.io/2021/03/19/Java-Serializable/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://pic1.zhimg.com/80/v2-6e6506b05b15e294a39766bb606da720_720w.jpg">
-      <meta itemprop="name" content="Qの博客">
-      <meta itemprop="description" content="一位普通的java程序员(￣▽￣)ノ">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="o(>ω<)o">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blog/2021/03/19/Java-Serializable/" class="post-title-link" itemprop="url">Java序列化有什么作用？序列化与不序列化有什么区别？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-03-19 16:41:53" itemprop="dateCreated datePublished" datetime="2021-03-19T16:41:53+08:00">2021-03-19</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-03-23 14:04:07" itemprop="dateModified" datetime="2021-03-23T14:04:07+08:00">2021-03-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>6.6k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>6 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="序列化是干啥用的？"><a href="#序列化是干啥用的？" class="headerlink" title="序列化是干啥用的？"></a><strong>序列化是干啥用的？</strong></h2><p>序列化的原本意图是希望对一个Java对象作一下“变换”，变成字节序列，这样一来方便持久化存储到磁盘，避免程序运行结束后对象就从内存里消失，另外变换成字节序列也更便于网络运输和传播，所以概念上很好理解：</p>
-<ul>
-<li><strong>序列化</strong>：把Java对象转换为字节序列。</li>
-<li><strong>反序列化</strong>：把字节序列恢复为原先的Java对象。</li>
-</ul>
-<p><img src="https://pic1.zhimg.com/50/v2-d5b7da5ee39eef8754554efb392e7668_hd.jpg?source=1940ef5c" alt="img"><img src="https://pic1.zhimg.com/80/v2-d5b7da5ee39eef8754554efb392e7668_720w.jpg?source=1940ef5c" alt="img"></p>
-<p>而且序列化机制从某种意义上来说也弥补了平台化的一些差异，毕竟转换后的字节流可以在其他平台上进行反序列化来恢复对象。</p>
-<p>事情就是那么个事情，看起来很简单，不过后面的东西还不少，请往下看。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/blog/2021/03/19/Java-Serializable/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-	<div>
-	  
-	</div>
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-
   
 
 
@@ -883,6 +421,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B9%90%E8%A7%82%E9%94%81"><span class="nav-number">1.</span> <span class="nav-text">乐观锁</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CAS"><span class="nav-number">2.</span> <span class="nav-text">CAS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ABA%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">ABA问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Java%E6%A8%A1%E6%8B%9FCAS%E7%AE%97%E6%B3%95"><span class="nav-number">4.</span> <span class="nav-text">使用Java模拟CAS算法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%9F%E5%AD%90%E7%B1%BB"><span class="nav-number">5.</span> <span class="nav-text">原子类</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B"><span class="nav-number">5.1.</span> <span class="nav-text">基本类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B"><span class="nav-number">5.2.</span> <span class="nav-text">引用类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">5.3.</span> <span class="nav-text">数组类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E5%B1%9E%E6%80%A7%E7%B1%BB%E5%9E%8B"><span class="nav-number">5.4.</span> <span class="nav-text">对象属性类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E6%80%A7%E8%83%BD%E5%8E%9F%E5%AD%90%E7%B1%BB"><span class="nav-number">5.5.</span> <span class="nav-text">高性能原子类</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
