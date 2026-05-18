@@ -60,6 +60,10 @@
 		let html = '';
 		let currentLevel = 2;
 		headings.forEach((heading, i) => {
+			// Skip footnotes section heading
+			if (heading.textContent.trim().toLowerCase() === 'footnotes') return;
+			if (heading.closest('.footnotes')) return;
+
 			const level = parseInt(heading.tagName[1]);
 			const id = heading.id || 'heading-' + i;
 			heading.id = id;
