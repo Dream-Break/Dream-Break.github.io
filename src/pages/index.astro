@@ -28,6 +28,14 @@ const posts = [...pinnedPosts, ...regularPosts];
 	<body>
 		<div class="headband"></div>
 		<Header />
+		<section class="hero">
+			<canvas id="particles-canvas"></canvas>
+			<div class="hero-content">
+				<h1 class="hero-title">Qの博客</h1>
+				<p class="hero-slogan" id="typewriter"></p>
+				<p class="hero-sub">Java | 并发编程 | 技术笔记</p>
+			</div>
+		</section>
 		<div class="layout">
 			<main class="animate-in">
 				<section class="posts">
@@ -75,6 +83,129 @@ const posts = [...pinnedPosts, ...regularPosts];
 		<SearchPopup />
 		<Live2D />
 		<EasterEgg />
+
+		<script is:inline>
+		// Typewriter effect
+		(function() {
+			const slogans = [
+				'一位普通的Java程序员 (￣▽￣)ノ',
+				'代码改变世界，咖啡续命人生 ☕',
+				'学无止境，保持好奇心 ✨',
+				'用AI提升效率，用代码创造价值 🚀',
+			];
+			let sloganIndex = 0;
+			let charIndex = 0;
+			let isDeleting = false;
+			const el = document.getElementById('typewriter');
+			if (!el) return;
+
+			function type() {
+				const current = slogans[sloganIndex];
+				if (isDeleting) {
+					el.textContent = current.substring(0, charIndex - 1);
+					charIndex--;
+				} else {
+					el.textContent = current.substring(0, charIndex + 1);
+					charIndex++;
+				}
+
+				let delay = isDeleting ? 40 : 80;
+
+				if (!isDeleting && charIndex === current.length) {
+					delay = 2500; // Pause at end
+					isDeleting = true;
+				} else if (isDeleting && charIndex === 0) {
+					isDeleting = false;
+					sloganIndex = (sloganIndex + 1) % slogans.length;
+					delay = 500;
+				}
+				setTimeout(type, delay);
+			}
+			setTimeout(type, 800);
+		})();
+
+		// Particles animation
+		(function() {
+			const canvas = document.getElementById('particles-canvas');
+			if (!canvas) return;
+			const ctx = canvas.getContext('2d');
+			let particles = [];
+			let animId;
+
+			function resize() {
+				canvas.width = canvas.offsetWidth;
+				canvas.height = canvas.offsetHeight;
+			}
+			resize();
+			window.addEventListener('resize', resize);
+
+			function createParticles() {
+				particles = [];
+				const count = Math.floor(canvas.width * canvas.height / 12000);
+				for (let i = 0; i < count; i++) {
+					particles.push({
+						x: Math.random() * canvas.width,
+						y: Math.random() * canvas.height,
+						vx: (Math.random() - 0.5) * 0.5,
+						vy: (Math.random() - 0.5) * 0.5,
+						r: Math.random() * 2 + 1,
+					});
+				}
+			}
+			createParticles();
+
+			function draw() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+				const color = isDark ? 'rgba(129, 140, 248, ' : 'rgba(99, 102, 241, ';
+
+				// Draw particles
+				particles.forEach(p => {
+					ctx.beginPath();
+					ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+					ctx.fillStyle = color + '0.4)';
+					ctx.fill();
+				});
+
+				// Draw connections
+				for (let i = 0; i < particles.length; i++) {
+					for (let j = i + 1; j < particles.length; j++) {
+						const dx = particles[i].x - particles[j].x;
+						const dy = particles[i].y - particles[j].y;
+						const dist = Math.sqrt(dx * dx + dy * dy);
+						if (dist < 100) {
+							ctx.beginPath();
+							ctx.moveTo(particles[i].x, particles[i].y);
+							ctx.lineTo(particles[j].x, particles[j].y);
+							ctx.strokeStyle = color + (0.15 * (1 - dist / 100)) + ')';
+							ctx.lineWidth = 0.5;
+							ctx.stroke();
+						}
+					}
+				}
+
+				// Update positions
+				particles.forEach(p => {
+					p.x += p.vx;
+					p.y += p.vy;
+					if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+					if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+				});
+
+				animId = requestAnimationFrame(draw);
+			}
+			draw();
+
+			// Pause when not visible
+			document.addEventListener('visibilitychange', () => {
+				if (document.hidden) {
+					cancelAnimationFrame(animId);
+				} else {
+					draw();
+				}
+			});
+		})();
+		</script>
 	</body>
 </html>
 
@@ -172,5 +303,67 @@ const posts = [...pinnedPosts, ...regularPosts];
 	}
 	.read-more:hover {
 		text-decoration: underline;
+	}
+	/* Hero Section */
+	.hero {
+		position: relative;
+		padding: 4em 2em;
+		text-align: center;
+		overflow: hidden;
+		background: var(--bg-secondary);
+		border-bottom: 1px solid var(--border);
+		transition: background-color 0.3s ease;
+	}
+	#particles-canvas {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+	}
+	.hero-content {
+		position: relative;
+		z-index: 1;
+	}
+	.hero-title {
+		font-size: 2.8em;
+		margin-bottom: 0.3em;
+		background: linear-gradient(135deg, var(--accent), var(--accent-light), #f472b6);
+		background-size: 200% 200%;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		animation: gradientShift 4s ease infinite;
+	}
+	@keyframes gradientShift {
+		0%, 100% { background-position: 0% 50%; }
+		50% { background-position: 100% 50%; }
+	}
+	.hero-slogan {
+		font-size: 1.2em;
+		color: var(--text-secondary);
+		min-height: 1.5em;
+		margin-bottom: 0.3em;
+	}
+	.hero-slogan::after {
+		content: '|';
+		animation: blink 1s step-end infinite;
+		color: var(--accent);
+	}
+	@keyframes blink {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0; }
+	}
+	.hero-sub {
+		font-size: 0.9em;
+		color: var(--text-secondary);
+		opacity: 0.7;
+		margin: 0;
+	}
+	@media (max-width: 720px) {
+		.hero { padding: 3em 1em; }
+		.hero-title { font-size: 2em; }
+		.hero-slogan { font-size: 1em; }
 	}
 </style>
