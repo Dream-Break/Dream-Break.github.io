@@ -28,7 +28,7 @@ category: 'Java'
 
 举个例子，假如我们要对`Student`类对象序列化到一个名为`student.txt`的文本文件中，然后再通过文本文件反序列化成`Student`类对象：
 
-### 1、Student类定义
+### Student类定义
 
 ```java
 public class Student implements Serializable {
@@ -50,7 +50,7 @@ public class Student implements Serializable {
 }
 ```
 
-### 2、序列化
+### 序列化
 
 ```java
 public static void serialize() throws IOException {
@@ -70,7 +70,7 @@ public static void serialize() throws IOException {
 }
 ```
 
-### 3、反序列化
+### 反序列化
 
 ```java
 public static void deserialize() throws IOException, ClassNotFoundException {
@@ -84,7 +84,7 @@ public static void deserialize() throws IOException, ClassNotFoundException {
 }
 ```
 
-### 4、运行结果
+### 运行结果
 
 ```
 序列化成功！已经生成student.txt文件
