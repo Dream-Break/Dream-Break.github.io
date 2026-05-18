@@ -89,6 +89,10 @@ a {
 }
 a:hover {
 	color: var(--accent-light);
+}
+.post-body a:hover,
+.post-excerpt a:hover,
+.about-content a:hover {
 	text-decoration: underline;
 }
 
