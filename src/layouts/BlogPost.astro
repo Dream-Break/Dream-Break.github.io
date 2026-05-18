@@ -1,0 +1,162 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import Header from '../components/Header.astro';
+
+type Props = CollectionEntry<'blog'>['data'];
+
+const { title, description, pubDate, updatedDate, heroImage, tags, category } = Astro.props;
+---
+
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={title} description={description} />
+		<style>
+			main {
+				width: calc(100% - 2em);
+				max-width: 100%;
+				margin: 0;
+			}
+			.hero-image {
+				width: 100%;
+			}
+			.hero-image img {
+				display: block;
+				margin: 0 auto;
+				border-radius: 12px;
+				box-shadow: var(--box-shadow);
+			}
+			.prose {
+				width: 780px;
+				max-width: calc(100% - 2em);
+				margin: auto;
+				padding: 1em;
+			}
+			.title {
+				margin-bottom: 2em;
+				padding: 2em 0 1em;
+			}
+			.title h1 {
+				margin: 0 0 0.5em 0;
+				font-size: 2em;
+				line-height: 1.3;
+			}
+			.meta {
+				display: flex;
+				align-items: center;
+				flex-wrap: wrap;
+				gap: 1em;
+				color: var(--text-secondary);
+				font-size: 0.9em;
+				margin-bottom: 0.5em;
+			}
+			.meta .category {
+				padding: 0.2em 0.7em;
+				background: var(--accent);
+				color: white;
+				border-radius: 4px;
+				font-size: 0.85em;
+			}
+			.tags {
+				display: flex;
+				gap: 0.5em;
+				margin-top: 0.5em;
+			}
+			.tag {
+				padding: 0.2em 0.7em;
+				border-radius: 4px;
+				background: var(--code-bg);
+				font-size: 0.85em;
+				color: var(--accent);
+			}
+			.last-updated-on {
+				font-style: italic;
+				color: var(--text-secondary);
+				font-size: 0.85em;
+			}
+			.prose :global(h2) {
+				margin-top: 2em;
+				padding-bottom: 0.3em;
+				border-bottom: 1px solid var(--border);
+			}
+			.prose :global(h3) {
+				margin-top: 1.5em;
+			}
+			.prose :global(pre) {
+				margin: 1.5em 0;
+			}
+			.prose :global(table) {
+				border-collapse: collapse;
+				margin: 1.5em 0;
+			}
+			.prose :global(th),
+			.prose :global(td) {
+				border: 1px solid var(--border);
+				padding: 0.5em 1em;
+				text-align: left;
+			}
+			.prose :global(th) {
+				background: var(--code-bg);
+				font-weight: 600;
+			}
+			.back-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.3em;
+				margin-top: 3em;
+				padding: 0.5em 1em;
+				border-radius: 8px;
+				background: var(--code-bg);
+				color: var(--text-secondary);
+				text-decoration: none;
+				font-size: 0.9em;
+				transition: color 0.2s ease;
+			}
+			.back-link:hover {
+				color: var(--accent);
+				text-decoration: none;
+			}
+			@media (max-width: 720px) {
+				.title h1 {
+					font-size: 1.5em;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<Header />
+		<main>
+			<article>
+				<div class="hero-image">
+					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
+				</div>
+				<div class="prose">
+					<div class="title">
+						<div class="meta">
+							<FormattedDate date={pubDate} />
+							{category && <span class="category">{category}</span>}
+							{updatedDate && (
+								<span class="last-updated-on">
+									更新于 <FormattedDate date={updatedDate} />
+								</span>
+							)}
+						</div>
+						<h1>{title}</h1>
+						{tags && tags.length > 0 && (
+							<div class="tags">
+								{tags.map((tag) => <span class="tag">#{tag}</span>)}
+							</div>
+						)}
+					</div>
+					<slot />
+					<a class="back-link" href="/blog">← 返回文章列表</a>
+				</div>
+			</article>
+		</main>
+		<Footer />
+	</body>
+</html>
