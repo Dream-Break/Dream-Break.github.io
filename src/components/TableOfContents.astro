@@ -48,7 +48,7 @@
 
 <script is:inline>
 	function buildTOC() {
-		const article = document.querySelector('article .prose');
+		const article = document.querySelector('.post-body');
 		if (!article) return;
 		const headings = article.querySelectorAll('h2, h3');
 		const tocList = document.getElementById('toc-list');
