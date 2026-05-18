@@ -9,11 +9,22 @@ import TableOfContents from '../components/TableOfContents.astro';
 import BackToTop from '../components/BackToTop.astro';
 import SearchPopup from '../components/SearchPopup.astro';
 import Live2D from '../components/Live2D.astro';
+import Comments from '../components/Comments.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+type Props = CollectionEntry<'blog'>['data'] & {
+	wordCount?: number;
+	readingTime?: number;
+};
 
-const { title, description, pubDate, updatedDate, heroImage, tags, category } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, tags, category, wordCount, readingTime } = Astro.props;
+
+function formatCount(count: number): string {
+	if (count >= 1000) {
+		return (count / 1000).toFixed(1) + 'k';
+	}
+	return count.toString();
+}
 ---
 
 <html lang="zh-CN">
@@ -51,6 +62,18 @@ const { title, description, pubDate, updatedDate, heroImage, tags, category } = 
 										<a href={`/categories/${category}/`}>{category}</a>
 									</span>
 								)}
+								{wordCount && (
+									<span class="meta-item">
+										<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+										本文字数：{formatCount(wordCount)}
+									</span>
+								)}
+								{readingTime && (
+									<span class="meta-item">
+										<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+										阅读时长 ≈ {readingTime} 分钟
+									</span>
+								)}
 							</div>
 							{tags && tags.length > 0 && (
 								<div class="post-tags">
@@ -67,6 +90,7 @@ const { title, description, pubDate, updatedDate, heroImage, tags, category } = 
 							<div class="end-divider">
 								<span>本文结束 感谢您的阅读</span>
 							</div>
+							<Comments />
 							<a class="back-link" href="/">← 返回首页</a>
 						</footer>
 					</div>

@@ -1,0 +1,61 @@
+---
+---
+
+<section class="comments-section">
+	<h3 class="comments-title">评论</h3>
+	<div id="giscus-container">
+		<script
+			is:inline
+			src="https://giscus.app/client.js"
+			data-repo="Dream-Break/Dream-Break.github.io"
+			data-repo-id=""
+			data-category="General"
+			data-category-id=""
+			data-mapping="pathname"
+			data-strict="0"
+			data-reactions-enabled="1"
+			data-emit-metadata="0"
+			data-input-position="top"
+			data-theme="preferred_color_scheme"
+			data-lang="zh-CN"
+			data-loading="lazy"
+			crossorigin="anonymous"
+			async
+		></script>
+	</div>
+</section>
+
+<style>
+	.comments-section {
+		margin-top: 3em;
+		padding-top: 2em;
+		border-top: 1px solid var(--border);
+	}
+	.comments-title {
+		margin-bottom: 1em;
+		font-size: 1.2em;
+		color: var(--text);
+	}
+	/* Sync giscus theme with our dark/light toggle */
+	:global(.giscus-frame) {
+		width: 100%;
+	}
+</style>
+
+<script is:inline>
+	// Sync giscus theme with site theme
+	function updateGiscusTheme() {
+		const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+		const iframe = document.querySelector('iframe.giscus-frame');
+		if (iframe) {
+			iframe.contentWindow.postMessage(
+				{ giscus: { setConfig: { theme: theme } } },
+				'https://giscus.app'
+			);
+		}
+	}
+
+	// Watch for theme changes
+	const observer = new MutationObserver(() => updateGiscusTheme());
+	observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+</script>

@@ -1,4 +1,27 @@
 ---
 ---
 
+<style is:global>
+	/* Override Live2D widget position and size */
+	#waifu {
+		position: fixed !important;
+		right: 10px !important;
+		left: auto !important;
+		bottom: 0 !important;
+		z-index: 998 !important;
+		transform: scale(0.6) !important;
+		transform-origin: bottom right !important;
+		pointer-events: auto;
+	}
+	#waifu-tips {
+		font-size: 12px !important;
+	}
+	/* Hide on mobile */
+	@media (max-width: 768px) {
+		#waifu {
+			display: none !important;
+		}
+	}
+</style>
+
 <script is:inline src="https://cdn.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/autoload.js"></script>
