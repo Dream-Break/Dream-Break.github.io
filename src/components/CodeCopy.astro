@@ -1,0 +1,64 @@
+---
+---
+
+<style is:global>
+	/* Code block wrapper for copy button */
+	pre {
+		position: relative;
+	}
+	.code-copy-btn {
+		position: absolute;
+		top: 8px;
+		right: 8px;
+		padding: 4px 8px;
+		border: 1px solid var(--border);
+		border-radius: 6px;
+		background: var(--card-bg);
+		color: var(--text-secondary);
+		font-size: 0.75em;
+		cursor: pointer;
+		opacity: 0;
+		transition: opacity 0.2s ease, color 0.2s ease, background 0.2s ease;
+		z-index: 1;
+	}
+	pre:hover .code-copy-btn {
+		opacity: 1;
+	}
+	.code-copy-btn:hover {
+		color: var(--accent);
+		border-color: var(--accent);
+	}
+	.code-copy-btn.copied {
+		color: #10b981;
+		border-color: #10b981;
+	}
+</style>
+
+<script is:inline>
+	function addCopyButtons() {
+		document.querySelectorAll('pre').forEach(pre => {
+			if (pre.querySelector('.code-copy-btn')) return;
+			const btn = document.createElement('button');
+			btn.className = 'code-copy-btn';
+			btn.textContent = '复制';
+			btn.addEventListener('click', async () => {
+				const code = pre.querySelector('code');
+				const text = code ? code.textContent : pre.textContent;
+				try {
+					await navigator.clipboard.writeText(text);
+					btn.textContent = '已复制!';
+					btn.classList.add('copied');
+					setTimeout(() => {
+						btn.textContent = '复制';
+						btn.classList.remove('copied');
+					}, 2000);
+				} catch (e) {
+					btn.textContent = '失败';
+					setTimeout(() => { btn.textContent = '复制'; }, 2000);
+				}
+			});
+			pre.appendChild(btn);
+		});
+	}
+	addCopyButtons();
+</script>

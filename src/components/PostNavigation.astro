@@ -1,0 +1,86 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+	currentId: string;
+}
+
+const { currentId } = Astro.props;
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+const currentIndex = posts.findIndex(p => p.id === currentId);
+const prevPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+const nextPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
+---
+
+{(prevPost || nextPost) && (
+	<nav class="post-nav">
+		<div class="post-nav-item prev">
+			{prevPost && (
+				<a href={`/blog/${prevPost.id}/`}>
+					<span class="nav-label">← 上一篇</span>
+					<span class="nav-title">{prevPost.data.title}</span>
+				</a>
+			)}
+		</div>
+		<div class="post-nav-item next">
+			{nextPost && (
+				<a href={`/blog/${nextPost.id}/`}>
+					<span class="nav-label">下一篇 →</span>
+					<span class="nav-title">{nextPost.data.title}</span>
+				</a>
+			)}
+		</div>
+	</nav>
+)}
+
+<style>
+	.post-nav {
+		display: flex;
+		gap: 1em;
+		margin: 2em 0;
+	}
+	.post-nav-item {
+		flex: 1;
+	}
+	.post-nav-item a {
+		display: block;
+		padding: 1em 1.2em;
+		border: 1px solid var(--border);
+		border-radius: 8px;
+		text-decoration: none;
+		transition: border-color 0.2s ease, background 0.2s ease;
+	}
+	.post-nav-item a:hover {
+		border-color: var(--accent);
+		background: var(--code-bg);
+		text-decoration: none;
+	}
+	.post-nav-item.next {
+		text-align: right;
+	}
+	.nav-label {
+		display: block;
+		font-size: 0.8em;
+		color: var(--text-secondary);
+		margin-bottom: 0.3em;
+	}
+	.nav-title {
+		display: block;
+		font-size: 0.9em;
+		color: var(--text);
+		font-weight: 500;
+		line-height: 1.4;
+	}
+	@media (max-width: 600px) {
+		.post-nav {
+			flex-direction: column;
+		}
+		.post-nav-item.next {
+			text-align: left;
+		}
+	}
+</style>

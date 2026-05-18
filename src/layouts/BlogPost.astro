@@ -10,14 +10,19 @@ import BackToTop from '../components/BackToTop.astro';
 import SearchPopup from '../components/SearchPopup.astro';
 import Live2D from '../components/Live2D.astro';
 import Comments from '../components/Comments.astro';
+import ReadingProgress from '../components/ReadingProgress.astro';
+import PostNavigation from '../components/PostNavigation.astro';
+import CodeCopy from '../components/CodeCopy.astro';
+import ImageLightbox from '../components/ImageLightbox.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 
 type Props = CollectionEntry<'blog'>['data'] & {
 	wordCount?: number;
 	readingTime?: number;
+	currentId?: string;
 };
 
-const { title, description, pubDate, updatedDate, heroImage, tags, category, wordCount, readingTime } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, tags, category, wordCount, readingTime, currentId } = Astro.props;
 
 function formatCount(count: number): string {
 	if (count >= 1000) {
@@ -33,6 +38,7 @@ function formatCount(count: number): string {
 	</head>
 	<body>
 		<div class="headband"></div>
+		<ReadingProgress />
 		<Header />
 		<div class="layout post-layout">
 			<main class="animate-in">
@@ -90,6 +96,7 @@ function formatCount(count: number): string {
 							<div class="end-divider">
 								<span>本文结束 感谢您的阅读</span>
 							</div>
+							{currentId && <PostNavigation currentId={currentId} />}
 							<Comments />
 							<a class="back-link" href="/">← 返回首页</a>
 						</footer>
@@ -104,6 +111,8 @@ function formatCount(count: number): string {
 		<Footer />
 		<BackToTop />
 		<SearchPopup />
+		<CodeCopy />
+		<ImageLightbox />
 		<Live2D />
 	</body>
 </html>

@@ -7,11 +7,22 @@ const today = new Date();
 		<p class="footer-copyright">
 			&copy; {today.getFullYear()} &hearts; Qの博客
 		</p>
+		<p class="footer-stats">
+			<span id="busuanzi_container_site_pv">
+				本站总访问量 <span id="busuanzi_value_site_pv">-</span> 次
+			</span>
+			&nbsp;|&nbsp;
+			<span id="busuanzi_container_site_uv">
+				访客数 <span id="busuanzi_value_site_uv">-</span> 人
+			</span>
+		</p>
 		<p class="footer-powered">
 			Built with <a href="https://astro.build/" target="_blank">Astro</a>
 		</p>
 	</div>
 </footer>
+
+<script is:inline src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
 
 <style>
 	footer {
@@ -31,6 +42,10 @@ const today = new Date();
 	}
 	.footer-copyright {
 		font-size: 1em;
+	}
+	.footer-stats {
+		font-size: 0.85em;
+		opacity: 0.8;
 	}
 	.footer-powered {
 		opacity: 0.7;

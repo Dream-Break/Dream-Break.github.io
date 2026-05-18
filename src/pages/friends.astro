@@ -1,0 +1,135 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import Sidebar from '../components/Sidebar.astro';
+import BackToTop from '../components/BackToTop.astro';
+import SearchPopup from '../components/SearchPopup.astro';
+import Live2D from '../components/Live2D.astro';
+import { SITE_TITLE } from '../consts';
+
+// Add your friends here!
+const friends = [
+	{
+		name: '示例友链',
+		url: 'https://example.com',
+		avatar: 'https://via.placeholder.com/80',
+		description: '这是一个示例友链，可以替换为真实的链接',
+	},
+];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`友链 - ${SITE_TITLE}`} description="友情链接" />
+	</head>
+	<body>
+		<div class="headband"></div>
+		<Header />
+		<div class="layout">
+			<main class="animate-in">
+				<div class="page-header">
+					<h1>友链</h1>
+					<p class="page-subtitle">海内存知己，天涯若比邻</p>
+				</div>
+				<div class="friends-grid">
+					{friends.map(friend => (
+						<a href={friend.url} target="_blank" rel="noopener noreferrer" class="friend-card">
+							<img src={friend.avatar} alt={friend.name} class="friend-avatar" />
+							<div class="friend-info">
+								<h3 class="friend-name">{friend.name}</h3>
+								<p class="friend-desc">{friend.description}</p>
+							</div>
+						</a>
+					))}
+				</div>
+				<div class="friend-apply">
+					<h2>申请友链</h2>
+					<p>欢迎互换友链！请在评论区或 GitHub Issue 中留下以下信息：</p>
+					<ul>
+						<li>站点名称</li>
+						<li>站点地址</li>
+						<li>站点头像</li>
+						<li>站点描述</li>
+					</ul>
+				</div>
+			</main>
+			<Sidebar />
+		</div>
+		<Footer />
+		<BackToTop />
+		<SearchPopup />
+		<Live2D />
+	</body>
+</html>
+
+<style>
+	.friends-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: 1em;
+		margin-bottom: 3em;
+	}
+	.friend-card {
+		display: flex;
+		align-items: center;
+		gap: 1em;
+		padding: 1.2em;
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		background: var(--card-bg);
+		text-decoration: none;
+		transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+	}
+	.friend-card:hover {
+		border-color: var(--accent);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+		text-decoration: none;
+	}
+	.friend-avatar {
+		width: 50px;
+		height: 50px;
+		border-radius: 50%;
+		object-fit: cover;
+		flex-shrink: 0;
+	}
+	.friend-info {
+		min-width: 0;
+	}
+	.friend-name {
+		margin: 0;
+		font-size: 1em;
+		color: var(--text);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.friend-desc {
+		margin: 0.3em 0 0;
+		font-size: 0.8em;
+		color: var(--text-secondary);
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	.friend-apply {
+		padding: 2em;
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		background: var(--card-bg);
+	}
+	.friend-apply h2 {
+		margin-top: 0;
+		font-size: 1.2em;
+	}
+	.friend-apply ul {
+		padding-left: 1.5em;
+	}
+	.friend-apply li {
+		margin-bottom: 0.4em;
+		font-size: 0.9em;
+	}
+</style>

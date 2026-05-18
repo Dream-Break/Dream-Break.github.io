@@ -21,6 +21,6 @@ const wordCount = plainText.trim().length;
 const readingTime = Math.max(1, Math.ceil(wordCount / 400));
 ---
 
-<BlogPost {...post.data} wordCount={wordCount} readingTime={readingTime}>
+<BlogPost {...post.data} wordCount={wordCount} readingTime={readingTime} currentId={post.id}>
 	<Content />
 </BlogPost>
