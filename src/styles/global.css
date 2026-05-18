@@ -230,3 +230,36 @@ hr {
 	clip-path: inset(50%);
 	white-space: nowrap;
 }
+
+
+/* Footnotes */
+.footnotes {
+	margin-top: 3em;
+	padding-top: 1.5em;
+	border-top: 1px solid var(--border);
+	font-size: 0.85em;
+	color: var(--text-secondary);
+}
+.footnotes ol {
+	padding-left: 1.5em;
+}
+.footnotes li {
+	margin-bottom: 0.5em;
+}
+.footnotes li p {
+	margin: 0;
+}
+sup a[data-footnote-ref] {
+	color: var(--accent);
+	text-decoration: none;
+	font-weight: 600;
+	padding: 0 2px;
+}
+sup a[data-footnote-ref]:hover {
+	text-decoration: underline;
+}
+a[data-footnote-backref] {
+	color: var(--accent);
+	text-decoration: none;
+	margin-left: 4px;
+}

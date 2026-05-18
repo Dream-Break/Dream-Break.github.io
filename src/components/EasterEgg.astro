@@ -1,0 +1,92 @@
+---
+---
+
+<script is:inline>
+(function() {
+	// Console Easter Egg
+	console.log('%c ✨ Qの博客 ✨ ', 'background: linear-gradient(135deg, #6366f1, #ec4899); color: white; font-size: 24px; padding: 10px 20px; border-radius: 8px; font-weight: bold;');
+	console.log('%c 一位普通的Java程序员 (￣▽￣)ノ', 'color: #6366f1; font-size: 14px; padding: 4px 0;');
+	console.log('%c 🎮 试试 Konami Code: ↑↑↓↓←→←→BA', 'color: #94a3b8; font-size: 12px;');
+	console.log('%c 💻 Built with Astro | Source: github.com/Dream-Break', 'color: #94a3b8; font-size: 12px;');
+
+	// Konami Code Easter Egg: ↑↑↓↓←→←→BA
+	const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+	let konamiIndex = 0;
+
+	document.addEventListener('keydown', function(e) {
+		if (e.keyCode === konamiCode[konamiIndex]) {
+			konamiIndex++;
+			if (konamiIndex === konamiCode.length) {
+				konamiIndex = 0;
+				triggerEasterEgg();
+			}
+		} else {
+			konamiIndex = 0;
+		}
+	});
+
+	function triggerEasterEgg() {
+		// Create fireworks/confetti effect
+		const colors = ['#6366f1', '#ec4899', '#10b981', '#f97316', '#a855f7', '#06b6d4'];
+		const container = document.createElement('div');
+		container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99999;overflow:hidden;';
+		document.body.appendChild(container);
+
+		// Create particles
+		for (let i = 0; i < 80; i++) {
+			const particle = document.createElement('div');
+			const color = colors[Math.floor(Math.random() * colors.length)];
+			const size = Math.random() * 10 + 5;
+			const x = Math.random() * 100;
+			const duration = Math.random() * 2 + 1.5;
+			const delay = Math.random() * 0.5;
+
+			particle.style.cssText = `
+				position: absolute;
+				top: -20px;
+				left: ${x}%;
+				width: ${size}px;
+				height: ${size}px;
+				background: ${color};
+				border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+				animation: confettiFall ${duration}s ease-in ${delay}s forwards;
+				opacity: 0.9;
+			`;
+			container.appendChild(particle);
+		}
+
+		// Show message
+		const msg = document.createElement('div');
+		msg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--card-bg, white);border:2px solid var(--accent, #6366f1);border-radius:16px;padding:2em 3em;text-align:center;z-index:100000;animation:confettiPop 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.2);';
+		msg.innerHTML = '<div style="font-size:3em;margin-bottom:0.3em;">🎉</div><div style="font-size:1.3em;font-weight:bold;color:var(--text, #1e293b);">恭喜你发现了彩蛋！</div><div style="margin-top:0.5em;color:var(--text-secondary, #64748b);font-size:0.9em;">你是一个好奇的人 (☆▽☆)</div>';
+		document.body.appendChild(msg);
+
+		// Add animation keyframes
+		if (!document.getElementById('easter-egg-styles')) {
+			const style = document.createElement('style');
+			style.id = 'easter-egg-styles';
+			style.textContent = `
+				@keyframes confettiFall {
+					0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+					100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+				}
+				@keyframes confettiPop {
+					0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+					100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+				}
+			`;
+			document.head.appendChild(style);
+		}
+
+		// Clean up
+		setTimeout(() => {
+			container.remove();
+			msg.remove();
+		}, 4000);
+
+		// Also remove message on click
+		msg.style.cursor = 'pointer';
+		msg.addEventListener('click', () => msg.remove());
+	}
+})();
+</script>

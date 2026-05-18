@@ -1,0 +1,136 @@
+---
+---
+
+<div class="color-picker" id="color-picker">
+	<button class="color-picker-toggle" id="color-picker-toggle" title="切换主题色" aria-label="切换主题色">
+		<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<circle cx="13.5" cy="6.5" r="2.5"/>
+			<circle cx="17.5" cy="10.5" r="2.5"/>
+			<circle cx="8.5" cy="7.5" r="2.5"/>
+			<circle cx="6.5" cy="12.5" r="2.5"/>
+			<path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+		</svg>
+	</button>
+	<div class="color-options" id="color-options">
+		<button class="color-dot" data-color="indigo" title="靛蓝" style="background: #6366f1;"></button>
+		<button class="color-dot" data-color="purple" title="紫色" style="background: #a855f7;"></button>
+		<button class="color-dot" data-color="green" title="绿色" style="background: #10b981;"></button>
+		<button class="color-dot" data-color="pink" title="粉色" style="background: #ec4899;"></button>
+		<button class="color-dot" data-color="orange" title="橙色" style="background: #f97316;"></button>
+		<button class="color-dot" data-color="cyan" title="青色" style="background: #06b6d4;"></button>
+	</div>
+</div>
+
+<style>
+	.color-picker {
+		position: relative;
+		display: flex;
+		align-items: center;
+	}
+	.color-picker-toggle {
+		border: none;
+		background: none;
+		cursor: pointer;
+		padding: 0.4em;
+		color: var(--text-secondary);
+		border-radius: 6px;
+		display: flex;
+		align-items: center;
+		transition: color 0.2s ease, background 0.2s ease;
+	}
+	.color-picker-toggle:hover {
+		color: var(--accent);
+		background: var(--code-bg);
+	}
+	.color-options {
+		display: none;
+		position: absolute;
+		top: 100%;
+		right: 0;
+		margin-top: 8px;
+		padding: 8px;
+		background: var(--card-bg);
+		border: 1px solid var(--border);
+		border-radius: 10px;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+		gap: 6px;
+		flex-wrap: wrap;
+		width: 110px;
+		z-index: 200;
+	}
+	.color-options.open {
+		display: flex;
+	}
+	.color-dot {
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		border: 2px solid transparent;
+		cursor: pointer;
+		transition: transform 0.2s ease, border-color 0.2s ease;
+	}
+	.color-dot:hover {
+		transform: scale(1.2);
+	}
+	.color-dot.active {
+		border-color: var(--text);
+		transform: scale(1.15);
+	}
+</style>
+
+<script is:inline>
+(function() {
+	const colors = {
+		indigo: { accent: '#6366f1', light: '#818cf8', dark: '#4f46e5' },
+		purple: { accent: '#a855f7', light: '#c084fc', dark: '#9333ea' },
+		green:  { accent: '#10b981', light: '#34d399', dark: '#059669' },
+		pink:   { accent: '#ec4899', light: '#f472b6', dark: '#db2777' },
+		orange: { accent: '#f97316', light: '#fb923c', dark: '#ea580c' },
+		cyan:   { accent: '#06b6d4', light: '#22d3ee', dark: '#0891b2' },
+	};
+
+	function setColor(name) {
+		const c = colors[name];
+		if (!c) return;
+		document.documentElement.style.setProperty('--accent', c.accent);
+		document.documentElement.style.setProperty('--accent-light', c.light);
+		document.documentElement.style.setProperty('--accent-dark', c.dark);
+		localStorage.setItem('theme-color', name);
+		// Update active dot
+		document.querySelectorAll('.color-dot').forEach(d => {
+			d.classList.toggle('active', d.dataset.color === name);
+		});
+	}
+
+	// Load saved color
+	const saved = localStorage.getItem('theme-color');
+	if (saved && colors[saved]) setColor(saved);
+
+	// Toggle panel
+	const toggle = document.getElementById('color-picker-toggle');
+	const options = document.getElementById('color-options');
+	toggle.addEventListener('click', () => {
+		options.classList.toggle('open');
+	});
+
+	// Close on outside click
+	document.addEventListener('click', (e) => {
+		if (!document.getElementById('color-picker').contains(e.target)) {
+			options.classList.remove('open');
+		}
+	});
+
+	// Select color
+	document.querySelectorAll('.color-dot').forEach(dot => {
+		dot.addEventListener('click', () => {
+			setColor(dot.dataset.color);
+		});
+	});
+
+	// Mark current active
+	const current = localStorage.getItem('theme-color') || 'indigo';
+	document.querySelectorAll('.color-dot').forEach(d => {
+		d.classList.toggle('active', d.dataset.color === current);
+	});
+})();
+</script>

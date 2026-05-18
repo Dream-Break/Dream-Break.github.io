@@ -2,12 +2,16 @@
 
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import remarkGfm from 'remark-gfm';
 import { defineConfig, fontProviders } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://dream-break.github.io',
 	integrations: [mdx(), sitemap()],
+	markdown: {
+		remarkPlugins: [remarkGfm],
+	},
 	fonts: [
 		{
 			provider: fontProviders.local(),
