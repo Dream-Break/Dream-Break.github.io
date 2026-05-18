@@ -32,12 +32,39 @@
 		color: #10b981;
 		border-color: #10b981;
 	}
+	.code-lang-label {
+		position: absolute;
+		top: 8px;
+		left: 12px;
+		font-size: 0.7em;
+		color: var(--text-secondary);
+		opacity: 0.6;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		font-weight: 600;
+		pointer-events: none;
+	}
 </style>
 
 <script is:inline>
 	function addCopyButtons() {
 		document.querySelectorAll('pre').forEach(pre => {
 			if (pre.querySelector('.code-copy-btn')) return;
+
+			// Add language label
+			const code = pre.querySelector('code');
+			if (code) {
+				const className = code.className || '';
+				const langMatch = className.match(/language-(\w+)/);
+				if (langMatch) {
+					const langLabel = document.createElement('span');
+					langLabel.className = 'code-lang-label';
+					langLabel.textContent = langMatch[1];
+					pre.appendChild(langLabel);
+				}
+			}
+
+			// Add copy button
 			const btn = document.createElement('button');
 			btn.className = 'code-copy-btn';
 			btn.textContent = '复制';
