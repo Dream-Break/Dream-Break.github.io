@@ -1,0 +1,136 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import Sidebar from '../components/Sidebar.astro';
+import BackToTop from '../components/BackToTop.astro';
+import SearchPopup from '../components/SearchPopup.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import { SITE_TITLE } from '../consts';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+// Group posts by year
+const postsByYear = new Map<number, typeof posts>();
+posts.forEach(post => {
+	const year = post.data.pubDate.getFullYear();
+	if (!postsByYear.has(year)) postsByYear.set(year, []);
+	postsByYear.get(year)!.push(post);
+});
+const years = [...postsByYear.keys()].sort((a, b) => b - a);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`归档 - ${SITE_TITLE}`} description="文章归档" />
+	</head>
+	<body>
+		<div class="headband"></div>
+		<Header />
+		<div class="layout">
+			<main class="animate-in">
+				<div class="page-header">
+					<h1>归档</h1>
+					<p class="page-subtitle">嗯..! 目前共计 {posts.length} 篇日志。 继续努力。</p>
+				</div>
+				<div class="timeline">
+					{years.map(year => (
+						<div class="year-group">
+							<h2 class="year-title">{year}</h2>
+							<ul class="post-list">
+								{postsByYear.get(year)!.map(post => (
+									<li class="post-item">
+										<a href={`/blog/${post.id}/`}>
+											<span class="post-date">
+												{String(post.data.pubDate.getMonth() + 1).padStart(2, '0')}-{String(post.data.pubDate.getDate()).padStart(2, '0')}
+											</span>
+											<span class="post-title">{post.data.title}</span>
+										</a>
+									</li>
+								))}
+							</ul>
+						</div>
+					))}
+				</div>
+			</main>
+			<Sidebar />
+		</div>
+		<Footer />
+		<BackToTop />
+		<SearchPopup />
+	</body>
+</html>
+
+<style>
+	.timeline {
+		padding-left: 1em;
+		border-left: 2px solid var(--border);
+	}
+	.year-group {
+		margin-bottom: 2em;
+	}
+	.year-title {
+		font-size: 1.3em;
+		margin: 0 0 0.5em -1em;
+		padding-left: 1em;
+		position: relative;
+	}
+	.year-title::before {
+		content: '';
+		position: absolute;
+		left: -7px;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background: var(--accent);
+	}
+	.post-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	.post-item {
+		margin-bottom: 0.3em;
+		position: relative;
+	}
+	.post-item::before {
+		content: '';
+		position: absolute;
+		left: -1.35em;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--border);
+	}
+	.post-item a {
+		display: flex;
+		align-items: center;
+		gap: 1em;
+		padding: 0.5em 0.8em;
+		border-radius: 6px;
+		text-decoration: none;
+		color: var(--text);
+		transition: background 0.2s ease;
+	}
+	.post-item a:hover {
+		background: var(--code-bg);
+		text-decoration: none;
+	}
+	.post-date {
+		color: var(--text-secondary);
+		font-size: 0.85em;
+		font-family: monospace;
+		min-width: 4em;
+	}
+	.post-title {
+		font-weight: 500;
+	}
+</style>

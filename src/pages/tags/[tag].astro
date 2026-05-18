@@ -1,0 +1,86 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import BackToTop from '../../components/BackToTop.astro';
+import SearchPopup from '../../components/SearchPopup.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import { SITE_TITLE } from '../../consts';
+
+export async function getStaticPaths() {
+	const posts = await getCollection('blog');
+	const tags = [...new Set(posts.flatMap(p => p.data.tags || []))];
+	return tags.map(tag => ({
+		params: { tag },
+		props: {
+			tag,
+			posts: posts.filter(p => (p.data.tags || []).includes(tag))
+				.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+		},
+	}));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`标签: ${tag} - ${SITE_TITLE}`} description={`包含标签「${tag}」的文章`} />
+	</head>
+	<body>
+		<div class="headband"></div>
+		<Header />
+		<div class="layout">
+			<main class="animate-in">
+				<div class="page-header">
+					<h1>#{tag}</h1>
+					<p class="page-subtitle">共 {posts.length} 篇文章</p>
+				</div>
+				<ul class="post-list">
+					{posts.map(post => (
+						<li class="post-item">
+							<a href={`/blog/${post.id}/`}>
+								<FormattedDate date={post.data.pubDate} />
+								<span class="post-title">{post.data.title}</span>
+							</a>
+						</li>
+					))}
+				</ul>
+			</main>
+			<Sidebar />
+		</div>
+		<Footer />
+		<BackToTop />
+		<SearchPopup />
+	</body>
+</html>
+
+<style>
+	.post-list {
+		list-style: none;
+		padding: 0;
+	}
+	.post-item {
+		margin-bottom: 0.5em;
+	}
+	.post-item a {
+		display: flex;
+		align-items: center;
+		gap: 1em;
+		padding: 0.8em 1em;
+		border-radius: 8px;
+		text-decoration: none;
+		color: var(--text);
+		transition: background 0.2s ease;
+	}
+	.post-item a:hover {
+		background: var(--code-bg);
+		text-decoration: none;
+	}
+	.post-title {
+		font-weight: 500;
+	}
+</style>

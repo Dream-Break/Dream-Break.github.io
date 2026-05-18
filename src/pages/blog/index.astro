@@ -4,6 +4,10 @@ import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import BackToTop from '../../components/BackToTop.astro';
+import SearchPopup from '../../components/SearchPopup.astro';
+import Live2D from '../../components/Live2D.astro';
 import { SITE_TITLE } from '../../consts';
 
 const posts = (await getCollection('blog')).sort(
@@ -17,100 +21,135 @@ const posts = (await getCollection('blog')).sort(
 		<BaseHead title={`文章 - ${SITE_TITLE}`} description="所有文章列表" />
 	</head>
 	<body>
+		<div class="headband"></div>
 		<Header />
-		<main>
-			<h1 class="page-title">全部文章</h1>
-			<p class="post-count">共 {posts.length} 篇</p>
-			<ul class="post-list">
-				{posts.map((post) => (
-					<li class="post-item">
-						<a href={`/blog/${post.id}/`}>
-							<div class="post-meta">
-								<FormattedDate date={post.data.pubDate} />
-								{post.data.tags && (
-									<div class="tags">
+		<div class="layout">
+			<main class="animate-in">
+				<div class="page-header">
+					<h1>全部文章</h1>
+					<p class="page-subtitle">共 {posts.length} 篇</p>
+				</div>
+				<div class="posts">
+					{posts.map((post) => (
+						<article class="post-card">
+							<header>
+								<h2 class="post-title">
+									<a href={`/blog/${post.id}/`}>{post.data.title}</a>
+								</h2>
+								<div class="post-info">
+									<span class="post-date">
+										<FormattedDate date={post.data.pubDate} />
+									</span>
+									{post.data.category && (
+										<span class="post-category">
+											<a href={`/categories/${post.data.category}/`}>{post.data.category}</a>
+										</span>
+									)}
+								</div>
+							</header>
+							{post.data.description && (
+								<p class="post-excerpt">{post.data.description}</p>
+							)}
+							<footer class="post-footer-bar">
+								{post.data.tags && post.data.tags.length > 0 && (
+									<div class="post-tags">
 										{post.data.tags.map((tag: string) => (
-											<span class="tag">{tag}</span>
+											<a href={`/tags/${tag}/`} class="tag">#{tag}</a>
 										))}
 									</div>
 								)}
-							</div>
-							<h2 class="post-title">{post.data.title}</h2>
-							{post.data.description && (
-								<p class="post-desc">{post.data.description}</p>
-							)}
-						</a>
-					</li>
-				))}
-			</ul>
-		</main>
+								<a href={`/blog/${post.id}/`} class="read-more">阅读全文 &raquo;</a>
+							</footer>
+						</article>
+					))}
+				</div>
+			</main>
+			<Sidebar />
+		</div>
 		<Footer />
+		<BackToTop />
+		<SearchPopup />
+		<Live2D />
 	</body>
 </html>
 
 <style>
-	.page-title {
-		margin-bottom: 0.2em;
-	}
-	.post-count {
-		color: var(--text-secondary);
-		margin-bottom: 2em;
-	}
-	.post-list {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-	}
-	.post-item {
-		margin-bottom: 0.5em;
-	}
-	.post-item a {
-		display: block;
-		padding: 1.5em;
-		border-radius: 12px;
-		border: 1px solid var(--border);
-		background: var(--card-bg);
-		text-decoration: none;
-		transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-	}
-	.post-item a:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
-		border-color: var(--accent);
-		text-decoration: none;
-	}
-	.post-meta {
+	.posts {
 		display: flex;
-		align-items: center;
+		flex-direction: column;
+		gap: 1.5em;
+	}
+	.post-card {
+		padding: 1.5em;
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		background: var(--card-bg);
+		transition: border-color 0.2s ease;
+	}
+	.post-card:hover {
+		border-color: var(--accent);
+	}
+	.post-title {
+		margin: 0 0 0.4em;
+		font-size: 1.2em;
+	}
+	.post-title a {
+		color: var(--text);
+		text-decoration: none;
+	}
+	.post-title a:hover {
+		color: var(--accent);
+	}
+	.post-info {
+		display: flex;
 		gap: 1em;
 		font-size: 0.85em;
 		color: var(--text-secondary);
 	}
-	.tags {
-		display: flex;
-		gap: 0.5em;
+	.post-category a {
+		color: var(--text-secondary);
+		text-decoration: none;
 	}
-	.tag {
-		padding: 0.15em 0.6em;
-		border-radius: 4px;
-		background: var(--code-bg);
-		font-size: 0.85em;
+	.post-category a:hover {
 		color: var(--accent);
 	}
-	.post-title {
-		margin: 0.5em 0 0.3em;
-		color: var(--text);
-		font-size: 1.2em;
-	}
-	.post-desc {
-		margin: 0;
+	.post-excerpt {
 		color: var(--text-secondary);
 		font-size: 0.9em;
-		line-height: 1.6;
+		margin: 0.8em 0;
 	}
-	@media (max-width: 720px) {
-		.post-item a {
-			padding: 1em;
-		}
+	.post-footer-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-top: 1em;
+		padding-top: 0.8em;
+		border-top: 1px solid var(--border);
+	}
+	.post-tags {
+		display: flex;
+		gap: 0.5em;
+		flex-wrap: wrap;
+	}
+	.tag {
+		font-size: 0.8em;
+		color: var(--accent);
+		text-decoration: none;
+		padding: 0.2em 0.5em;
+		border-radius: 4px;
+		background: var(--code-bg);
+	}
+	.tag:hover {
+		background: var(--accent);
+		color: white;
+		text-decoration: none;
+	}
+	.read-more {
+		font-size: 0.85em;
+		color: var(--accent);
+		text-decoration: none;
+	}
+	.read-more:hover {
+		text-decoration: underline;
 	}
 </style>

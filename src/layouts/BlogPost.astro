@@ -3,8 +3,13 @@ import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
-import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
+import Sidebar from '../components/Sidebar.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import BackToTop from '../components/BackToTop.astro';
+import SearchPopup from '../components/SearchPopup.astro';
+import Live2D from '../components/Live2D.astro';
+import FormattedDate from '../components/FormattedDate.astro';
 
 type Props = CollectionEntry<'blog'>['data'];
 
@@ -14,149 +19,236 @@ const { title, description, pubDate, updatedDate, heroImage, tags, category } = 
 <html lang="zh-CN">
 	<head>
 		<BaseHead title={title} description={description} />
-		<style>
-			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
-			}
-			.hero-image {
-				width: 100%;
-			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
-			}
-			.prose {
-				width: 780px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-			}
-			.title {
-				margin-bottom: 2em;
-				padding: 2em 0 1em;
-			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-				font-size: 2em;
-				line-height: 1.3;
-			}
-			.meta {
-				display: flex;
-				align-items: center;
-				flex-wrap: wrap;
-				gap: 1em;
-				color: var(--text-secondary);
-				font-size: 0.9em;
-				margin-bottom: 0.5em;
-			}
-			.meta .category {
-				padding: 0.2em 0.7em;
-				background: var(--accent);
-				color: white;
-				border-radius: 4px;
-				font-size: 0.85em;
-			}
-			.tags {
-				display: flex;
-				gap: 0.5em;
-				margin-top: 0.5em;
-			}
-			.tag {
-				padding: 0.2em 0.7em;
-				border-radius: 4px;
-				background: var(--code-bg);
-				font-size: 0.85em;
-				color: var(--accent);
-			}
-			.last-updated-on {
-				font-style: italic;
-				color: var(--text-secondary);
-				font-size: 0.85em;
-			}
-			.prose :global(h2) {
-				margin-top: 2em;
-				padding-bottom: 0.3em;
-				border-bottom: 1px solid var(--border);
-			}
-			.prose :global(h3) {
-				margin-top: 1.5em;
-			}
-			.prose :global(pre) {
-				margin: 1.5em 0;
-			}
-			.prose :global(table) {
-				border-collapse: collapse;
-				margin: 1.5em 0;
-			}
-			.prose :global(th),
-			.prose :global(td) {
-				border: 1px solid var(--border);
-				padding: 0.5em 1em;
-				text-align: left;
-			}
-			.prose :global(th) {
-				background: var(--code-bg);
-				font-weight: 600;
-			}
-			.back-link {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.3em;
-				margin-top: 3em;
-				padding: 0.5em 1em;
-				border-radius: 8px;
-				background: var(--code-bg);
-				color: var(--text-secondary);
-				text-decoration: none;
-				font-size: 0.9em;
-				transition: color 0.2s ease;
-			}
-			.back-link:hover {
-				color: var(--accent);
-				text-decoration: none;
-			}
-			@media (max-width: 720px) {
-				.title h1 {
-					font-size: 1.5em;
-				}
-			}
-		</style>
 	</head>
-
 	<body>
+		<div class="headband"></div>
 		<Header />
-		<main>
-			<article>
-				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
-				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="meta">
-							<FormattedDate date={pubDate} />
-							{category && <span class="category">{category}</span>}
-							{updatedDate && (
-								<span class="last-updated-on">
-									更新于 <FormattedDate date={updatedDate} />
-								</span>
-							)}
+		<div class="layout post-layout">
+			<main class="animate-in">
+				<article>
+					{heroImage && (
+						<div class="hero-image">
+							<Image width={1020} height={510} src={heroImage} alt="" />
 						</div>
-						<h1>{title}</h1>
-						{tags && tags.length > 0 && (
-							<div class="tags">
-								{tags.map((tag) => <span class="tag">#{tag}</span>)}
+					)}
+					<div class="prose">
+						<header class="post-header">
+							<h1>{title}</h1>
+							<div class="post-meta">
+								<span class="meta-item">
+									<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+									发表于 <FormattedDate date={pubDate} />
+								</span>
+								{updatedDate && (
+									<span class="meta-item">
+										<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+										更新于 <FormattedDate date={updatedDate} />
+									</span>
+								)}
+								{category && (
+									<span class="meta-item">
+										<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+										<a href={`/categories/${category}/`}>{category}</a>
+									</span>
+								)}
 							</div>
-						)}
+							{tags && tags.length > 0 && (
+								<div class="post-tags">
+									{tags.map((tag) => (
+										<a href={`/tags/${tag}/`} class="tag">#{tag}</a>
+									))}
+								</div>
+							)}
+						</header>
+						<div class="post-body">
+							<slot />
+						</div>
+						<footer class="post-end">
+							<div class="end-divider">
+								<span>本文结束 感谢您的阅读</span>
+							</div>
+							<a class="back-link" href="/">← 返回首页</a>
+						</footer>
 					</div>
-					<slot />
-					<a class="back-link" href="/blog">← 返回文章列表</a>
-				</div>
-			</article>
-		</main>
+				</article>
+			</main>
+			<aside class="post-sidebar">
+				<Sidebar />
+				<TableOfContents />
+			</aside>
+		</div>
 		<Footer />
+		<BackToTop />
+		<SearchPopup />
+		<Live2D />
 	</body>
 </html>
+
+<style>
+	.post-layout {
+		align-items: flex-start;
+	}
+	.post-layout main {
+		flex: 1;
+		min-width: 0;
+	}
+	.post-sidebar {
+		position: sticky;
+		top: 80px;
+		width: 260px;
+		flex-shrink: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+	.post-sidebar :global(.sidebar) {
+		position: static;
+	}
+	.hero-image {
+		margin-bottom: 1.5em;
+	}
+	.hero-image img {
+		width: 100%;
+		border-radius: 12px;
+	}
+	.prose {
+		max-width: 100%;
+	}
+	.post-header {
+		margin-bottom: 2em;
+		padding-bottom: 1.5em;
+		border-bottom: 1px solid var(--border);
+	}
+	.post-header h1 {
+		margin: 0 0 0.6em;
+		font-size: 1.8em;
+		line-height: 1.4;
+	}
+	.post-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em 1.2em;
+		color: var(--text-secondary);
+		font-size: 0.85em;
+		margin-bottom: 0.8em;
+	}
+	.meta-item {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3em;
+	}
+	.meta-item a {
+		color: var(--text-secondary);
+		text-decoration: none;
+	}
+	.meta-item a:hover {
+		color: var(--accent);
+	}
+	.meta-item svg {
+		opacity: 0.7;
+	}
+	.post-tags {
+		display: flex;
+		gap: 0.5em;
+		flex-wrap: wrap;
+	}
+	.tag {
+		font-size: 0.8em;
+		color: var(--accent);
+		text-decoration: none;
+		padding: 0.2em 0.6em;
+		border-radius: 4px;
+		background: var(--code-bg);
+		transition: background 0.2s ease, color 0.2s ease;
+	}
+	.tag:hover {
+		background: var(--accent);
+		color: white;
+		text-decoration: none;
+	}
+	.post-body :global(h2) {
+		margin-top: 2em;
+		padding-bottom: 0.3em;
+		border-bottom: 1px solid var(--border);
+	}
+	.post-body :global(h3) {
+		margin-top: 1.5em;
+	}
+	.post-body :global(pre) {
+		margin: 1.5em 0;
+		font-size: 0.9em;
+	}
+	.post-body :global(table) {
+		border-collapse: collapse;
+		margin: 1.5em 0;
+		font-size: 0.9em;
+	}
+	.post-body :global(th),
+	.post-body :global(td) {
+		border: 1px solid var(--border);
+		padding: 0.5em 0.8em;
+		text-align: left;
+	}
+	.post-body :global(th) {
+		background: var(--code-bg);
+		font-weight: 600;
+	}
+	.post-body :global(blockquote) {
+		border-left: 4px solid var(--accent);
+		margin: 1.5em 0;
+		padding: 0.5em 1.2em;
+		background: var(--code-bg);
+		border-radius: 0 8px 8px 0;
+	}
+	.post-body :global(img) {
+		border-radius: 8px;
+		margin: 1em 0;
+	}
+	.post-end {
+		margin-top: 3em;
+		padding-top: 1.5em;
+		border-top: 1px solid var(--border);
+	}
+	.end-divider {
+		text-align: center;
+		color: var(--text-secondary);
+		font-size: 0.85em;
+		margin-bottom: 1.5em;
+	}
+	.end-divider span {
+		padding: 0 1em;
+		position: relative;
+	}
+	.end-divider span::before,
+	.end-divider span::after {
+		content: '---';
+		color: var(--border);
+		margin: 0 0.5em;
+	}
+	.back-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3em;
+		padding: 0.5em 1em;
+		border-radius: 8px;
+		background: var(--code-bg);
+		color: var(--text-secondary);
+		text-decoration: none;
+		font-size: 0.9em;
+		transition: color 0.2s ease, background 0.2s ease;
+	}
+	.back-link:hover {
+		color: var(--accent);
+		text-decoration: none;
+	}
+	@media (max-width: 1024px) {
+		.post-sidebar {
+			display: none;
+		}
+	}
+	@media (max-width: 720px) {
+		.post-header h1 {
+			font-size: 1.4em;
+		}
+	}
+</style>

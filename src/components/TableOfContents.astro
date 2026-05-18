@@ -1,0 +1,95 @@
+---
+// TOC is generated client-side from headings
+---
+
+<nav class="toc" id="toc">
+	<h4 class="toc-title">文章目录</h4>
+	<ol class="toc-list" id="toc-list"></ol>
+</nav>
+
+<style>
+	.toc {
+		background: var(--card-bg);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		padding: 1.2em;
+		margin-top: 1em;
+		transition: background-color 0.3s ease, border-color 0.3s ease;
+	}
+	.toc-title {
+		margin: 0 0 0.8em;
+		font-size: 0.9em;
+		color: var(--text-secondary);
+		font-weight: 600;
+	}
+	.toc-list {
+		margin: 0;
+		padding-left: 1.2em;
+		font-size: 0.85em;
+		line-height: 1.8;
+	}
+	.toc-list :global(ol) {
+		padding-left: 1.2em;
+		margin: 0;
+	}
+	.toc-list :global(li) {
+		color: var(--text-secondary);
+	}
+	.toc-list :global(a) {
+		color: var(--text-secondary);
+		text-decoration: none;
+		transition: color 0.2s ease;
+	}
+	.toc-list :global(a:hover),
+	.toc-list :global(a.active) {
+		color: var(--accent);
+	}
+</style>
+
+<script is:inline>
+	function buildTOC() {
+		const article = document.querySelector('article .prose');
+		if (!article) return;
+		const headings = article.querySelectorAll('h2, h3');
+		const tocList = document.getElementById('toc-list');
+		if (!tocList || headings.length === 0) {
+			const toc = document.getElementById('toc');
+			if (toc) toc.style.display = 'none';
+			return;
+		}
+		let html = '';
+		let currentLevel = 2;
+		headings.forEach((heading, i) => {
+			const level = parseInt(heading.tagName[1]);
+			const id = heading.id || 'heading-' + i;
+			heading.id = id;
+			const text = heading.textContent;
+			if (level > currentLevel) {
+				html += '<ol>'.repeat(level - currentLevel);
+			} else if (level < currentLevel) {
+				html += '</ol>'.repeat(currentLevel - level);
+			}
+			html += `<li><a href="#${id}">${text}</a></li>`;
+			currentLevel = level;
+		});
+		if (currentLevel > 2) {
+			html += '</ol>'.repeat(currentLevel - 2);
+		}
+		tocList.innerHTML = html;
+
+		// Highlight active heading on scroll
+		const links = tocList.querySelectorAll('a');
+		const observer = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					links.forEach(l => l.classList.remove('active'));
+					const active = tocList.querySelector(`a[href="#${entry.target.id}"]`);
+					if (active) active.classList.add('active');
+				}
+			});
+		}, { rootMargin: '0px 0px -80% 0px' });
+
+		headings.forEach(h => observer.observe(h));
+	}
+	buildTOC();
+</script>

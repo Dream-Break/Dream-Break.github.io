@@ -2,6 +2,10 @@
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import Sidebar from '../components/Sidebar.astro';
+import BackToTop from '../components/BackToTop.astro';
+import SearchPopup from '../components/SearchPopup.astro';
+import Live2D from '../components/Live2D.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import { getCollection } from 'astro:content';
@@ -17,117 +21,145 @@ const posts = (await getCollection('blog')).sort(
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 	</head>
 	<body>
+		<div class="headband"></div>
 		<Header />
-		<main>
-			<section class="hero">
-				<h1>Qの博客</h1>
-				<p class="hero-desc">{SITE_DESCRIPTION}</p>
-			</section>
-
-			<section class="posts">
-				<h2>最新文章</h2>
-				<ul class="post-list">
+		<div class="layout">
+			<main class="animate-in">
+				<section class="posts">
 					{posts.map((post) => (
-						<li class="post-card">
-							<a href={`/blog/${post.id}/`}>
-								<div class="post-meta">
-									<FormattedDate date={post.data.pubDate} />
-									{post.data.tags && (
-										<div class="post-tags">
-											{post.data.tags.map((tag: string) => (
-												<span class="tag">{tag}</span>
-											))}
-										</div>
+						<article class="post-card">
+							<header>
+								<h2 class="post-title">
+									<a href={`/blog/${post.id}/`}>{post.data.title}</a>
+								</h2>
+								<div class="post-info">
+									<span class="post-date">
+										<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+										<FormattedDate date={post.data.pubDate} />
+									</span>
+									{post.data.category && (
+										<span class="post-category">
+											<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+											<a href={`/categories/${post.data.category}/`}>{post.data.category}</a>
+										</span>
 									)}
 								</div>
-								<h3>{post.data.title}</h3>
-								{post.data.description && <p>{post.data.description}</p>}
-							</a>
-						</li>
+							</header>
+							{post.data.description && (
+								<p class="post-excerpt">{post.data.description}</p>
+							)}
+							<footer class="post-footer">
+								{post.data.tags && post.data.tags.length > 0 && (
+									<div class="post-tags">
+										{post.data.tags.map((tag: string) => (
+											<a href={`/tags/${tag}/`} class="tag">#{tag}</a>
+										))}
+									</div>
+								)}
+								<a href={`/blog/${post.id}/`} class="read-more">阅读全文 &raquo;</a>
+							</footer>
+						</article>
 					))}
-				</ul>
-			</section>
-		</main>
+				</section>
+			</main>
+			<Sidebar />
+		</div>
 		<Footer />
+		<BackToTop />
+		<SearchPopup />
+		<Live2D />
 	</body>
 </html>
 
 <style>
-	.hero {
-		text-align: center;
-		padding: 3em 0 2em;
-	}
-	.hero h1 {
-		font-size: 2.5em;
-		margin-bottom: 0.3em;
-		background: linear-gradient(135deg, var(--accent), var(--accent-light));
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
-	.hero-desc {
-		color: var(--text-secondary);
-		font-size: 1.1em;
-	}
-	.posts h2 {
-		margin-bottom: 1em;
-		padding-bottom: 0.5em;
-		border-bottom: 2px solid var(--border);
-	}
-	.post-list {
-		list-style: none;
-		padding: 0;
-		margin: 0;
+	.posts {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5em;
 	}
 	.post-card {
-		margin-bottom: 0.5em;
-	}
-	.post-card a {
-		display: block;
-		padding: 1.5em;
-		border-radius: 12px;
+		padding: 1.8em;
 		border: 1px solid var(--border);
+		border-radius: 12px;
 		background: var(--card-bg);
-		text-decoration: none;
-		transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
 	}
-	.post-card a:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+	.post-card:hover {
 		border-color: var(--accent);
-		text-decoration: none;
+		box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
 	}
-	.post-card h3 {
-		margin: 0.5em 0 0.3em;
+	.post-title {
+		margin: 0 0 0.5em;
+		font-size: 1.4em;
+		line-height: 1.4;
+	}
+	.post-title a {
 		color: var(--text);
-		font-size: 1.2em;
+		text-decoration: none;
+		transition: color 0.2s ease;
 	}
-	.post-card p {
-		margin: 0;
-		color: var(--text-secondary);
-		font-size: 0.9em;
-		line-height: 1.6;
+	.post-title a:hover {
+		color: var(--accent);
 	}
-	.post-meta {
+	.post-info {
 		display: flex;
 		align-items: center;
-		gap: 1em;
+		gap: 1.2em;
 		font-size: 0.85em;
 		color: var(--text-secondary);
+	}
+	.post-date, .post-category {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3em;
+	}
+	.post-category a {
+		color: var(--text-secondary);
+		text-decoration: none;
+	}
+	.post-category a:hover {
+		color: var(--accent);
+	}
+	.post-excerpt {
+		color: var(--text-secondary);
+		margin: 1em 0;
+		line-height: 1.7;
+		font-size: 0.95em;
+	}
+	.post-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-top: 1em;
+		padding-top: 1em;
+		border-top: 1px solid var(--border);
 	}
 	.post-tags {
 		display: flex;
 		gap: 0.5em;
+		flex-wrap: wrap;
 	}
 	.tag {
-		padding: 0.15em 0.6em;
+		font-size: 0.8em;
+		color: var(--accent);
+		text-decoration: none;
+		padding: 0.2em 0.5em;
 		border-radius: 4px;
 		background: var(--code-bg);
+		transition: background 0.2s ease;
+	}
+	.tag:hover {
+		background: var(--accent);
+		color: white;
+		text-decoration: none;
+	}
+	.read-more {
 		font-size: 0.85em;
 		color: var(--accent);
+		text-decoration: none;
+		font-weight: 500;
 	}
-	@media (max-width: 720px) {
-		.hero h1 { font-size: 2em; }
-		.post-card a { padding: 1em; }
+	.read-more:hover {
+		text-decoration: underline;
 	}
 </style>

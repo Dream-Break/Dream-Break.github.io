@@ -1,0 +1,182 @@
+---
+import { getCollection } from 'astro:content';
+const posts = await getCollection('blog');
+const searchData = posts.map(post => ({
+	title: post.data.title,
+	description: post.data.description,
+	tags: post.data.tags || [],
+	url: `/blog/${post.id}/`,
+}));
+---
+
+<div class="search-overlay" id="search-overlay">
+	<div class="search-popup">
+		<div class="search-header">
+			<input
+				type="text"
+				id="search-input"
+				placeholder="搜索文章..."
+				autocomplete="off"
+			/>
+			<button class="search-close" id="search-close" aria-label="关闭搜索">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
+		</div>
+		<div class="search-results" id="search-results"></div>
+	</div>
+</div>
+
+<script is:inline define:vars={{ searchData }}>
+	const overlay = document.getElementById('search-overlay');
+	const input = document.getElementById('search-input');
+	const results = document.getElementById('search-results');
+	const closeBtn = document.getElementById('search-close');
+
+	// Open search
+	window.openSearch = function() {
+		overlay.classList.add('active');
+		setTimeout(() => input.focus(), 100);
+	};
+
+	// Close search
+	function closeSearch() {
+		overlay.classList.remove('active');
+		input.value = '';
+		results.innerHTML = '';
+	}
+
+	closeBtn.addEventListener('click', closeSearch);
+	overlay.addEventListener('click', (e) => {
+		if (e.target === overlay) closeSearch();
+	});
+
+	// Keyboard shortcut
+	document.addEventListener('keydown', (e) => {
+		if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+			e.preventDefault();
+			openSearch();
+		}
+		if (e.key === 'Escape') closeSearch();
+	});
+
+	// Search logic
+	input.addEventListener('input', (e) => {
+		const query = e.target.value.toLowerCase().trim();
+		if (!query) {
+			results.innerHTML = '';
+			return;
+		}
+		const matches = searchData.filter(post =>
+			post.title.toLowerCase().includes(query) ||
+			post.description.toLowerCase().includes(query) ||
+			post.tags.some(t => t.toLowerCase().includes(query))
+		);
+		if (matches.length === 0) {
+			results.innerHTML = '<div class="no-results">没有找到相关文章</div>';
+			return;
+		}
+		results.innerHTML = matches.map(post => `
+			<a href="${post.url}" class="search-result-item">
+				<h4>${post.title}</h4>
+				<p>${post.description}</p>
+			</a>
+		`).join('');
+	});
+</script>
+
+<style>
+	.search-overlay {
+		display: none;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.5);
+		backdrop-filter: blur(4px);
+		z-index: 9999;
+		align-items: flex-start;
+		justify-content: center;
+		padding-top: 15vh;
+	}
+	.search-overlay.active {
+		display: flex;
+	}
+	.search-popup {
+		width: 90%;
+		max-width: 560px;
+		background: var(--card-bg);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+		overflow: hidden;
+		animation: slideDown 0.2s ease;
+	}
+	@keyframes slideDown {
+		from { opacity: 0; transform: translateY(-10px); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+	.search-header {
+		display: flex;
+		align-items: center;
+		padding: 1em;
+		border-bottom: 1px solid var(--border);
+	}
+	#search-input {
+		flex: 1;
+		border: none;
+		background: none;
+		font-size: 1.1em;
+		color: var(--text);
+		outline: none;
+		padding: 0.3em;
+	}
+	#search-input::placeholder {
+		color: var(--text-secondary);
+	}
+	.search-close {
+		border: none;
+		background: none;
+		cursor: pointer;
+		color: var(--text-secondary);
+		padding: 0.3em;
+		border-radius: 4px;
+	}
+	.search-close:hover {
+		color: var(--accent);
+	}
+	.search-results {
+		max-height: 400px;
+		overflow-y: auto;
+		padding: 0.5em;
+	}
+	.search-results :global(.search-result-item) {
+		display: block;
+		padding: 0.8em 1em;
+		border-radius: 8px;
+		text-decoration: none;
+		transition: background 0.2s ease;
+	}
+	.search-results :global(.search-result-item:hover) {
+		background: var(--code-bg);
+		text-decoration: none;
+	}
+	.search-results :global(h4) {
+		margin: 0;
+		font-size: 0.95em;
+		color: var(--text);
+	}
+	.search-results :global(p) {
+		margin: 0.3em 0 0;
+		font-size: 0.8em;
+		color: var(--text-secondary);
+	}
+	.search-results :global(.no-results) {
+		padding: 2em;
+		text-align: center;
+		color: var(--text-secondary);
+	}
+</style>

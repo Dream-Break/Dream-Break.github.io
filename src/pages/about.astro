@@ -2,6 +2,10 @@
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import Sidebar from '../components/Sidebar.astro';
+import BackToTop from '../components/BackToTop.astro';
+import SearchPopup from '../components/SearchPopup.astro';
+import Live2D from '../components/Live2D.astro';
 import { SITE_TITLE } from '../consts';
 ---
 
@@ -11,50 +15,56 @@ import { SITE_TITLE } from '../consts';
 		<BaseHead title={`关于 - ${SITE_TITLE}`} description="关于我" />
 	</head>
 	<body>
+		<div class="headband"></div>
 		<Header />
-		<main>
-			<article class="about">
-				<h1>关于我</h1>
-				<p>
-					你好！我是一位普通的 Java 程序员 (￣▽￣)ノ
-				</p>
-				<p>
-					这里是我的技术博客，主要记录 Java 相关的学习笔记和技术总结，
-					包括多线程、并发编程、集合框架、序列化等方面的内容。
-				</p>
-				<h2>技术栈</h2>
-				<ul>
-					<li>Java / Spring Boot</li>
-					<li>多线程与并发编程</li>
-					<li>数据结构与算法</li>
-				</ul>
-				<h2>联系方式</h2>
-				<p>
-					GitHub: <a href="https://github.com/Dream-Break" target="_blank">@Dream-Break</a>
-				</p>
-			</article>
-		</main>
+		<div class="layout">
+			<main class="animate-in">
+				<div class="page-header">
+					<h1>关于我</h1>
+				</div>
+				<div class="about-content">
+					<p>
+						你好！我是一位普通的 Java 程序员 (￣▽￣)ノ
+					</p>
+					<p>
+						这里是我的技术博客，主要记录 Java 相关的学习笔记和技术总结，
+						包括多线程、并发编程、集合框架、序列化等方面的内容。
+					</p>
+					<h2>技术栈</h2>
+					<ul>
+						<li>Java / Spring Boot</li>
+						<li>多线程与并发编程</li>
+						<li>数据结构与算法</li>
+					</ul>
+					<h2>联系方式</h2>
+					<p>
+						GitHub: <a href="https://github.com/Dream-Break" target="_blank">@Dream-Break</a>
+					</p>
+				</div>
+			</main>
+			<Sidebar />
+		</div>
 		<Footer />
+		<BackToTop />
+		<SearchPopup />
+		<Live2D />
 	</body>
 </html>
 
 <style>
-	.about {
-		max-width: 650px;
-		margin: 0 auto;
-		padding: 2em 0;
+	.about-content {
+		line-height: 1.8;
 	}
-	.about h1 {
-		margin-bottom: 1em;
-	}
-	.about h2 {
+	.about-content h2 {
 		margin-top: 2em;
 		margin-bottom: 0.5em;
+		padding-bottom: 0.3em;
+		border-bottom: 1px solid var(--border);
 	}
-	.about ul {
+	.about-content ul {
 		padding-left: 1.5em;
 	}
-	.about li {
+	.about-content li {
 		margin-bottom: 0.5em;
 	}
 </style>

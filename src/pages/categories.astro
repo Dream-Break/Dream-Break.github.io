@@ -1,0 +1,89 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import Sidebar from '../components/Sidebar.astro';
+import BackToTop from '../components/BackToTop.astro';
+import SearchPopup from '../components/SearchPopup.astro';
+import { SITE_TITLE } from '../consts';
+
+const posts = await getCollection('blog');
+const categoryMap = new Map<string, number>();
+posts.forEach(post => {
+	const cat = post.data.category;
+	if (cat) categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1);
+});
+const categories = [...categoryMap.entries()].sort((a, b) => b[1] - a[1]);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`分类 - ${SITE_TITLE}`} description="所有分类" />
+	</head>
+	<body>
+		<div class="headband"></div>
+		<Header />
+		<div class="layout">
+			<main class="animate-in">
+				<div class="page-header">
+					<h1>分类</h1>
+					<p class="page-subtitle">目前共计 {categories.length} 个分类</p>
+				</div>
+				<ul class="category-list">
+					{categories.map(([cat, count]) => (
+						<li>
+							<a href={`/categories/${cat}/`}>
+								<span class="category-name">{cat}</span>
+								<span class="category-count">{count}</span>
+							</a>
+						</li>
+					))}
+				</ul>
+			</main>
+			<Sidebar />
+		</div>
+		<Footer />
+		<BackToTop />
+		<SearchPopup />
+	</body>
+</html>
+
+<style>
+	.category-list {
+		list-style: none;
+		padding: 0;
+	}
+	.category-list li {
+		margin-bottom: 0.3em;
+	}
+	.category-list a {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1em 1.2em;
+		border-radius: 8px;
+		text-decoration: none;
+		color: var(--text);
+		transition: background 0.2s ease;
+		border: 1px solid var(--border);
+	}
+	.category-list a:hover {
+		background: var(--code-bg);
+		border-color: var(--accent);
+		text-decoration: none;
+	}
+	.category-name {
+		font-weight: 600;
+		font-size: 1.05em;
+	}
+	.category-count {
+		background: var(--accent);
+		color: white;
+		padding: 0.2em 0.6em;
+		border-radius: 12px;
+		font-size: 0.8em;
+		font-weight: 600;
+	}
+</style>
