@@ -1,0 +1,42 @@
+---
+const today = new Date();
+---
+
+<footer>
+	<div class="footer-content">
+		<p>&copy; {today.getFullYear()} Qの博客. All rights reserved.</p>
+		<p class="footer-desc">一位普通的Java程序员 (￣▽￣)ノ</p>
+		<p class="footer-tech">
+			Built with <a href="https://astro.build/" target="_blank">Astro</a>
+		</p>
+	</div>
+</footer>
+
+<style>
+	footer {
+		padding: 3em 1em;
+		border-top: 1px solid var(--border);
+		color: var(--text-secondary);
+		text-align: center;
+		transition: border-color 0.3s ease;
+	}
+	.footer-content {
+		max-width: 780px;
+		margin: 0 auto;
+	}
+	.footer-content p {
+		margin: 0.3em 0;
+	}
+	.footer-desc {
+		font-size: 0.9em;
+		opacity: 0.8;
+	}
+	.footer-tech {
+		font-size: 0.85em;
+		margin-top: 1em !important;
+		opacity: 0.6;
+	}
+	.footer-tech a {
+		color: var(--accent);
+	}
+</style>
